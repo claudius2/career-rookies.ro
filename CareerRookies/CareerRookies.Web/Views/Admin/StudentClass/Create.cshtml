@@ -1,0 +1,53 @@
+@model StudentClass
+@{
+    ViewData["Title"] = "Adauga Clasa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Adauga Clasa</h1>
+        <a href="/Admin/StudentClasses" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Inapoi la lista
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/Admin/StudentClasses/Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Numele clasei (ex: 9A, 10B)" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Salveaza
+                    </button>
+                    <a href="/Admin/StudentClasses" class="btn btn-outline-secondary">Anuleaza</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

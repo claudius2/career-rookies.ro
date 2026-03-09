@@ -1,0 +1,63 @@
+@model List<Workshop>
+@{
+    ViewData["Title"] = "Workshop-uri Trecute";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Workshop-uri Trecute</h2>
+            <p>Explorează evenimentele noastre anterioare</p>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="row g-4">
+                @foreach (var workshop in Model)
+                {
+                    <div class="col-md-4">
+                        <div class="card card-cr workshop-card h-100">
+                            @if (!string.IsNullOrEmpty(workshop.ImagePath))
+                            {
+                                <img src="@workshop.ImagePath" class="card-img-top" alt="@workshop.Title">
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, #5B1A4A, #C2185B);">
+                                    <i class="bi bi-easel text-white" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            <span class="workshop-date">
+                                <i class="bi bi-calendar3 me-1"></i>@workshop.Date.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("ro-RO"))
+                            </span>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">@workshop.Title</h5>
+                                <div class="workshop-meta">
+                                    <span><i class="bi bi-person-fill me-1"></i>@workshop.SpeakerName</span>
+                                </div>
+                                <p class="card-text">
+                                    @(workshop.Description.Length > 150 ? workshop.Description.Substring(0, 150) + "..." : workshop.Description)
+                                </p>
+                                <div class="mt-auto pt-2">
+                                    <a asp-controller="Workshop" asp-action="Detail" asp-route-id="@workshop.Id" class="btn btn-secondary-cr">
+                                        Detalii <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x" style="font-size: 4rem; color: var(--cr-primary); opacity: 0.3;"></i>
+                <p class="mt-3 fs-5">Nu există workshop-uri trecute.</p>
+                <a asp-controller="Workshop" asp-action="Upcoming" class="btn btn-outline-cr mt-2">
+                    <i class="bi bi-arrow-right me-1"></i>Vezi workshop-uri viitoare
+                </a>
+            </div>
+        }
+    </div>
+</section>

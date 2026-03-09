@@ -1,0 +1,76 @@
+@model Dictionary<ResourceCategory, List<CareerResource>>
+@{
+    ViewData["Title"] = "Resurse pentru Carieră";
+
+    var categoryNames = new Dictionary<ResourceCategory, string>
+    {
+        { ResourceCategory.UniversityFair, "Târguri de Universități" },
+        { ResourceCategory.GuidanceFirm, "Firme de Consiliere" },
+        { ResourceCategory.EUProject, "Proiecte Europene" }
+    };
+
+    var categoryIcons = new Dictionary<ResourceCategory, string>
+    {
+        { ResourceCategory.UniversityFair, "bi-mortarboard" },
+        { ResourceCategory.GuidanceFirm, "bi-compass" },
+        { ResourceCategory.EUProject, "bi-globe-europe-africa" }
+    };
+
+    var categoryColors = new Dictionary<ResourceCategory, string>
+    {
+        { ResourceCategory.UniversityFair, "var(--cr-primary)" },
+        { ResourceCategory.GuidanceFirm, "var(--cr-accent)" },
+        { ResourceCategory.EUProject, "var(--cr-primary-dark)" }
+    };
+}
+
+<section class="page-section section-cream">
+    <div class="container">
+        <div class="section-title">
+            <h2>Resurse pentru Carieră</h2>
+            <p>O colecție de resurse utile pentru orientarea ta profesională.</p>
+        </div>
+
+        @if (Model.Any())
+        {
+            @foreach (var category in Model)
+            {
+                var catColor = categoryColors.GetValueOrDefault(category.Key, "var(--cr-primary)");
+                <div class="mb-5">
+                    <h2 class="fw-bold mb-4" style="color: var(--cr-primary-dark);">
+                        <i class="bi @(categoryIcons.GetValueOrDefault(category.Key, "bi-link-45deg")) me-2" style="color: @catColor;"></i>
+                        @(categoryNames.GetValueOrDefault(category.Key, category.Key.ToString()))
+                        <div style="width: 50px; height: 3px; background: @catColor; border-radius: 2px; margin-top: 0.5rem;"></div>
+                    </h2>
+                    <div class="row g-3">
+                        @foreach (var resource in category.Value)
+                        {
+                            <div class="col-md-4 col-sm-6">
+                                <a href="@resource.Url" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                    <div class="card card-cr h-100">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 44px; height: 44px; min-width: 44px; background: linear-gradient(135deg, var(--cr-primary), var(--cr-primary-dark));">
+                                                <i class="bi bi-box-arrow-up-right text-white" style="font-size: 1.1rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0" style="color: var(--cr-primary-dark);">@resource.Name</h6>
+                                                <small class="text-truncate d-block" style="max-width: 250px; color: #888;">@resource.Url</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-folder-x" style="font-size: 4rem; color: var(--cr-primary); opacity: 0.4;"></i>
+                <p class="mt-3 fs-5" style="color: #666;">Nu există resurse momentan.</p>
+            </div>
+        }
+    </div>
+</section>

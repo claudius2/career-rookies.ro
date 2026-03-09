@@ -1,0 +1,106 @@
+@model Workshop
+@{
+    ViewData["Title"] = "Editeaza Workshop";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Editeaza Workshop</h1>
+        <a href="/Admin/Workshops" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Inapoi la lista
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/Admin/Workshops/Edit/@Model.Id" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Titlul workshop-ului" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5" placeholder="Descrierea workshop-ului"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="Date" class="form-label"></label>
+                            <input asp-for="Date" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="Date" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Imagine workshop</label>
+                            <input type="file" name="image" class="form-control" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <div class="mt-2">
+                                    <img src="@Model.ImagePath" alt="Imagine curenta" class="img-thumbnail" style="max-height: 150px;" />
+                                    <small class="d-block text-muted mt-1">Imagine curenta. Incarcati una noua pentru a o inlocui.</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3">Informatii Speaker</h5>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="SpeakerName" class="form-label"></label>
+                            <input asp-for="SpeakerName" class="form-control" placeholder="Numele speaker-ului" />
+                            <span asp-validation-for="SpeakerName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SpeakerDescription" class="form-label"></label>
+                            <textarea asp-for="SpeakerDescription" class="form-control" rows="4" placeholder="Descrierea speaker-ului"></textarea>
+                            <span asp-validation-for="SpeakerDescription" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Imagine speaker</label>
+                            <input type="file" name="speakerImage" class="form-control" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(Model.SpeakerImagePath))
+                            {
+                                <div class="mt-2">
+                                    <img src="@Model.SpeakerImagePath" alt="Imagine speaker curenta" class="img-thumbnail" style="max-height: 150px;" />
+                                    <small class="d-block text-muted mt-1">Imagine curenta. Incarcati una noua pentru a o inlocui.</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Salveaza modificarile
+                    </button>
+                    <a href="/Admin/Workshops" class="btn btn-outline-secondary">Anuleaza</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

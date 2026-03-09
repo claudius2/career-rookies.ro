@@ -1,0 +1,42 @@
+@model Article
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="page-section section-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="breadcrumb-cr mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Acasă</a></li>
+                        <li class="breadcrumb-item"><a asp-controller="Article" asp-action="Index">Articole</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+                    </ol>
+                </nav>
+
+                <article>
+                    <h1 style="color: var(--cr-primary-dark); font-family: var(--cr-font-heading); font-weight: 700; margin-bottom: 1rem;">@Model.Title</h1>
+                    <div class="d-flex flex-wrap gap-3 mb-4 pb-3" style="border-bottom: 2px solid var(--cr-secondary);">
+                        <span style="color: #666;">
+                            <i class="bi bi-person me-1" style="color: var(--cr-primary);"></i>@Model.AuthorName
+                        </span>
+                        <span style="color: #666;">
+                            <i class="bi bi-calendar3 me-1" style="color: var(--cr-primary);"></i>@Model.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("ro-RO"))
+                        </span>
+                    </div>
+                    <div class="article-content fs-5 lh-lg">
+                        @Html.Raw(Model.Content)
+                    </div>
+                </article>
+
+                <div class="mt-5 pt-3" style="border-top: 1px solid #e8e0db;">
+                    <a asp-controller="Article" asp-action="Index" class="btn btn-outline-cr">
+                        <i class="bi bi-arrow-left me-1"></i>Înapoi la articole
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

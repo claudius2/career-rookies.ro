@@ -1,0 +1,80 @@
+@model List<StudentClass>
+@{
+    ViewData["Title"] = "Gestionare Clase";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Gestionare Clase</h1>
+        <a href="/Admin/StudentClasses/Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Adauga
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nume</th>
+                                <th>Activ</th>
+                                <th class="text-end">Actiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sc in Model)
+                            {
+                                <tr>
+                                    <td>@sc.Name</td>
+                                    <td>
+                                        @if (sc.IsActive)
+                                        {
+                                            <span class="badge bg-success">Da</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Nu</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="/Admin/StudentClasses/Edit/@sc.Id"
+                                           class="btn btn-sm btn-outline-primary" title="Editeaza">
+                                            <i class="bi bi-pencil"></i> Editeaza
+                                        </a>
+                                        <form action="/Admin/StudentClasses/Delete/@sc.Id"
+                                              method="post" class="d-inline ms-1"
+                                              onsubmit="return confirm('Sigur doriti sa stergeti aceasta clasa?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Sterge">
+                                                <i class="bi bi-trash"></i> Sterge
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-mortarboard fs-1 d-block mb-3"></i>
+                    <p>Nu exista clase. Adaugati prima clasa.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

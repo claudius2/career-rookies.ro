@@ -1,0 +1,70 @@
+@model Testimonial
+@{
+    ViewData["Title"] = "Editeaza Testimonial";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Editeaza Testimonial</h1>
+        <a href="/Admin/Testimonials" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Inapoi la lista
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/Admin/Testimonials/Edit/@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Text" class="form-label"></label>
+                            <textarea asp-for="Text" class="form-control" rows="5" placeholder="Textul testimonialului"></textarea>
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="AuthorName" class="form-label"></label>
+                            <input asp-for="AuthorName" class="form-control" placeholder="Numele autorului" />
+                            <span asp-validation-for="AuthorName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AuthorType" class="form-label"></label>
+                            <select asp-for="AuthorType" class="form-select">
+                                <option value="@AuthorType.Student">Student</option>
+                                <option value="@AuthorType.Speaker">Speaker</option>
+                            </select>
+                            <span asp-validation-for="AuthorType" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SortOrder" class="form-label"></label>
+                            <input asp-for="SortOrder" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Salveaza modificarile
+                    </button>
+                    <a href="/Admin/Testimonials" class="btn btn-outline-secondary">Anuleaza</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

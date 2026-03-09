@@ -1,0 +1,89 @@
+@model List<Testimonial>
+@{
+    ViewData["Title"] = "Gestionare Testimoniale";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Gestionare Testimoniale</h1>
+        <a href="/Admin/Testimonials/Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Adauga
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="max-width: 350px;">Text</th>
+                                <th>Autor</th>
+                                <th>Tip</th>
+                                <th>Ordine</th>
+                                <th class="text-end">Actiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var testimonial in Model)
+                            {
+                                <tr>
+                                    <td style="max-width: 350px;">
+                                        <span title="@testimonial.Text">
+                                            @(testimonial.Text.Length > 100 ? testimonial.Text.Substring(0, 100) + "..." : testimonial.Text)
+                                        </span>
+                                    </td>
+                                    <td>@testimonial.AuthorName</td>
+                                    <td>
+                                        @switch (testimonial.AuthorType)
+                                        {
+                                            case AuthorType.Student:
+                                                <span class="badge bg-primary">Student</span>
+                                                break;
+                                            case AuthorType.Speaker:
+                                                <span class="badge bg-info">Speaker</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@testimonial.SortOrder</td>
+                                    <td class="text-end">
+                                        <a href="/Admin/Testimonials/Edit/@testimonial.Id"
+                                           class="btn btn-sm btn-outline-primary" title="Editeaza">
+                                            <i class="bi bi-pencil"></i> Editeaza
+                                        </a>
+                                        <form action="/Admin/Testimonials/Delete/@testimonial.Id"
+                                              method="post" class="d-inline ms-1"
+                                              onsubmit="return confirm('Sigur doriti sa stergeti acest testimonial?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Sterge">
+                                                <i class="bi bi-trash"></i> Sterge
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-chat-quote fs-1 d-block mb-3"></i>
+                    <p>Nu exista testimoniale. Adaugati primul testimonial.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+@model List<Article>
+@{
+    ViewData["Title"] = "Gestionare Articole";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Gestionare Articole</h1>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Titlu</th>
+                                <th>Autor</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                                <th class="text-end">Actiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var article in Model)
+                            {
+                                <tr>
+                                    <td>@article.Title</td>
+                                    <td>@article.AuthorName</td>
+                                    <td>@article.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>
+                                        @if (article.IsApproved)
+                                        {
+                                            <span class="badge bg-success">Aprobat</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">In asteptare</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (!article.IsApproved)
+                                        {
+                                            <form action="/Admin/Articles/Approve/@article.Id"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Aproba">
+                                                    <i class="bi bi-check-lg"></i> Aproba
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form action="/Admin/Articles/Reject/@article.Id"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Respinge">
+                                                    <i class="bi bi-x-lg"></i> Respinge
+                                                </button>
+                                            </form>
+                                        }
+                                        <form action="/Admin/Articles/Delete/@article.Id"
+                                              method="post" class="d-inline ms-1"
+                                              onsubmit="return confirm('Sigur doriti sa stergeti acest articol?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Sterge">
+                                                <i class="bi bi-trash"></i> Sterge
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-file-earmark-text fs-1 d-block mb-3"></i>
+                    <p>Nu exista articole.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

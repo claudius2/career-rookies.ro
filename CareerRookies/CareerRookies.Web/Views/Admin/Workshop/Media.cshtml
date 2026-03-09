@@ -1,0 +1,162 @@
+@model Workshop
+@{
+    ViewData["Title"] = "Media - " + Model.Title;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Media</h1>
+            <p class="text-muted mb-0">Workshop: <strong>@Model.Title</strong></p>
+        </div>
+        <a href="/Admin/Workshops" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Inapoi la workshop-uri
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
+        </div>
+    }
+
+    <!-- Upload Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-upload me-2"></i>Incarca media</h5>
+        </div>
+        <div class="card-body">
+            <form action="/Admin/Workshops/Media/@Model.Id/Upload"
+                  method="post" enctype="multipart/form-data" id="mediaUploadForm">
+                @Html.AntiForgeryToken()
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="mediaType" class="form-label">Tip media</label>
+                        <select name="mediaType" id="mediaType" class="form-select">
+                            <option value="@MediaType.Image">Imagine</option>
+                            <option value="@MediaType.Video">Video</option>
+                            <option value="@MediaType.YouTubeLink">Link YouTube</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4" id="fileInputContainer">
+                        <label for="file" class="form-label">Fisier</label>
+                        <input type="file" name="file" id="file" class="form-control" accept="image/*,video/*" />
+                    </div>
+                    <div class="col-md-4" id="youtubeUrlContainer" style="display: none;">
+                        <label for="youtubeUrl" class="form-label">URL YouTube</label>
+                        <input type="url" name="youtubeUrl" id="youtubeUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=..." />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-upload me-1"></i> Incarca
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Existing Media -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-images me-2"></i>Media existenta</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Media.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var media in Model.Media)
+                    {
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card h-100">
+                                <div class="card-body p-2">
+                                    @if (media.MediaType == MediaType.Image)
+                                    {
+                                        <img src="@media.FilePath" alt="Media" class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;" />
+                                    }
+                                    else if (media.MediaType == MediaType.Video)
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 200px;">
+                                            <div class="text-center">
+                                                <i class="bi bi-film fs-1 text-muted"></i>
+                                                <p class="small text-muted mb-0">Video</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (media.MediaType == MediaType.YouTubeLink)
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 200px;">
+                                            <div class="text-center">
+                                                <i class="bi bi-youtube fs-1 text-danger"></i>
+                                                <p class="small text-muted mb-0">YouTube</p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-secondary">
+                                        @switch (media.MediaType)
+                                        {
+                                            case MediaType.Image:
+                                                @:Imagine
+                                                break;
+                                            case MediaType.Video:
+                                                @:Video
+                                                break;
+                                            case MediaType.YouTubeLink:
+                                                @:YouTube
+                                                break;
+                                        }
+                                    </span>
+                                    <form action="/Admin/Workshops/Media/Delete/@media.Id"
+                                          method="post"
+                                          onsubmit="return confirm('Sigur doriti sa stergeti aceasta media?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-images fs-1 d-block mb-3"></i>
+                    <p>Nu exista media pentru acest workshop.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('mediaType').addEventListener('change', function () {
+            var fileContainer = document.getElementById('fileInputContainer');
+            var youtubeContainer = document.getElementById('youtubeUrlContainer');
+
+            if (this.value === '@((int)MediaType.YouTubeLink)') {
+                fileContainer.style.display = 'none';
+                youtubeContainer.style.display = 'block';
+            } else {
+                fileContainer.style.display = 'block';
+                youtubeContainer.style.display = 'none';
+            }
+        });
+    </script>
+}

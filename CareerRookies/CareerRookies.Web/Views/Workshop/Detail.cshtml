@@ -1,0 +1,226 @@
+@model CareerRookies.Web.ViewModels.WorkshopDetailViewModel
+@{
+    ViewData["Title"] = Model.Workshop.Title;
+}
+
+<!-- Hero Banner -->
+<section class="hero-section mb-5">
+    @if (!string.IsNullOrEmpty(Model.Workshop.ImagePath))
+    {
+        <div class="position-relative" style="min-height: 400px; background-image: url('@Model.Workshop.ImagePath'); background-size: cover; background-position: center;">
+            <div class="hero-overlay"></div>
+            <div class="container position-relative d-flex align-items-center justify-content-center" style="min-height: 400px; z-index: 2;">
+                <div class="text-center text-white">
+                    <h1 class="display-4 fw-bold" style="text-shadow: 0 2px 8px rgba(0,0,0,0.3);">@Model.Workshop.Title</h1>
+                    <p class="lead" style="color: rgba(255,255,255,0.92);">
+                        <i class="bi bi-calendar-event me-2"></i>@Model.Workshop.Date.ToString("dd MMMM yyyy, HH:mm", new System.Globalization.CultureInfo("ro-RO"))
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex align-items-center justify-content-center" style="min-height: 400px; background: linear-gradient(135deg, var(--cr-primary) 0%, var(--cr-primary-dark) 100%);">
+            <div class="text-center text-white">
+                <h1 class="display-4 fw-bold" style="text-shadow: 0 2px 8px rgba(0,0,0,0.3);">@Model.Workshop.Title</h1>
+                <p class="lead" style="color: rgba(255,255,255,0.92);">
+                    <i class="bi bi-calendar-event me-2"></i>@Model.Workshop.Date.ToString("dd MMMM yyyy, HH:mm", new System.Globalization.CultureInfo("ro-RO"))
+                </p>
+            </div>
+        </div>
+    }
+</section>
+
+<div class="container">
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-cr-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Închide"></button>
+        </div>
+    }
+
+    <!-- Descriere -->
+    <section class="page-section">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="section-title text-start">
+                    <h2>Despre acest workshop</h2>
+                </div>
+                <div class="workshop-description">
+                    @Html.Raw(Model.Workshop.Description)
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-cr">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3" style="color: var(--cr-primary-dark);">Detalii eveniment</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-calendar-event me-2" style="color: var(--cr-primary);"></i>
+                                <strong>Data:</strong> @Model.Workshop.Date.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("ro-RO"))
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-clock me-2" style="color: var(--cr-primary);"></i>
+                                <strong>Ora:</strong> @Model.Workshop.Date.ToString("HH:mm")
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-person me-2" style="color: var(--cr-primary);"></i>
+                                <strong>Speaker:</strong> @Model.Workshop.SpeakerName
+                            </li>
+                        </ul>
+                        @if (Model.IsUpcoming)
+                        {
+                            <span class="badge badge-student fs-6 px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i>Înscrieri deschise
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary fs-6 px-3 py-2" style="border-radius: 20px;">
+                                <i class="bi bi-archive me-1"></i>Eveniment trecut
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Speaker -->
+    <section class="page-section section-cream" style="margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; border-radius: var(--cr-radius);">
+        <div class="section-title text-start">
+            <h2>Despre speaker</h2>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center mb-3 mb-md-0">
+                @if (!string.IsNullOrEmpty(Model.Workshop.SpeakerImagePath))
+                {
+                    <img src="@Model.Workshop.SpeakerImagePath" alt="@Model.Workshop.SpeakerName" class="rounded-circle img-fluid" style="width: 180px; height: 180px; object-fit: cover; border: 3px solid var(--cr-secondary);">
+                }
+                else
+                {
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 180px; height: 180px; background: linear-gradient(135deg, var(--cr-primary) 0%, var(--cr-primary-dark) 100%);">
+                        <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+                    </div>
+                }
+            </div>
+            <div class="col-md-9">
+                <h4 class="fw-bold" style="color: var(--cr-primary-dark);">@Model.Workshop.SpeakerName</h4>
+                <p>@Html.Raw(Model.Workshop.SpeakerDescription)</p>
+            </div>
+        </div>
+    </section>
+
+    @if (Model.IsUpcoming)
+    {
+        <!-- Formular de Înscriere -->
+        <section class="page-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card card-cr">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="section-title">
+                                <h2>Înscrie-te la workshop</h2>
+                            </div>
+                            <form asp-controller="Workshop" asp-action="Register" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                                <input type="hidden" asp-for="Registration.WorkshopId" value="@Model.Workshop.Id" />
+
+                                <div class="mb-3">
+                                    <label asp-for="Registration.StudentName" class="form-label"></label>
+                                    <input asp-for="Registration.StudentName" class="form-control form-control-lg" placeholder="Introdu numele tău complet" />
+                                    <span asp-validation-for="Registration.StudentName" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Registration.StudentClass" class="form-label"></label>
+                                    <select asp-for="Registration.StudentClass" class="form-select form-select-lg">
+                                        <option value="">-- Selectează clasa --</option>
+                                        @foreach (var studentClass in Model.StudentClasses)
+                                        {
+                                            <option value="@studentClass.Name">@studentClass.Name</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Registration.StudentClass" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input asp-for="Registration.GdprConsentAccepted" class="form-check-input" type="checkbox" />
+                                        <label asp-for="Registration.GdprConsentAccepted" class="form-check-label">
+                                            Accept prelucrarea datelor personale conform
+                                            <a asp-controller="Legal" asp-action="Privacy" target="_blank">Politicii de Confidențialitate</a>
+                                        </label>
+                                    </div>
+                                    <span asp-validation-for="Registration.GdprConsentAccepted" class="text-danger"></span>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary-cr btn-lg">
+                                        <i class="bi bi-send me-2"></i>Trimite înscrierea
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+    else
+    {
+        <!-- Galerie Media -->
+        @if (Model.Media.Any())
+        {
+            <section class="page-section">
+                <div class="section-title text-start">
+                    <h2>Galerie foto & video</h2>
+                </div>
+                <div class="row g-3">
+                    @foreach (var media in Model.Media)
+                    {
+                        <div class="col-md-4 col-sm-6">
+                            @if (media.MediaType == MediaType.Image)
+                            {
+                                <div class="card card-cr overflow-hidden">
+                                    <img src="@media.FilePath" alt="Workshop media" class="img-fluid" style="height: 250px; object-fit: cover; width: 100%;">
+                                </div>
+                            }
+                            else if (media.MediaType == MediaType.Video)
+                            {
+                                <div class="card card-cr overflow-hidden">
+                                    <video controls class="w-100" style="height: 250px; object-fit: cover;">
+                                        <source src="@media.FilePath" type="video/mp4">
+                                        Browserul tău nu suportă redarea video.
+                                    </video>
+                                </div>
+                            }
+                            else if (media.MediaType == MediaType.YouTubeLink)
+                            {
+                                <div class="card card-cr overflow-hidden">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="@media.FilePath" title="Video workshop" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+
+    <!-- Navigare -->
+    <div class="py-4">
+        <a asp-controller="Workshop" asp-action="@(Model.IsUpcoming ? "Upcoming" : "Past")" class="btn btn-outline-cr">
+            <i class="bi bi-arrow-left me-1"></i>Înapoi la workshop-uri
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
