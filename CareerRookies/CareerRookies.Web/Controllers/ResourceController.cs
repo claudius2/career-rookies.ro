@@ -3,6 +3,7 @@ using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Controllers;
 
+[Route("resurse")]
 public class ResourceController : Controller
 {
     private readonly IResourceService _resourceService;
@@ -12,6 +13,7 @@ public class ResourceController : Controller
         _resourceService = resourceService;
     }
 
+    [Route("")]
     public async Task<IActionResult> Index()
     {
         var grouped = await _resourceService.GetGroupedAsync();

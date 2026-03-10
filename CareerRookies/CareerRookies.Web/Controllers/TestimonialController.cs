@@ -3,6 +3,7 @@ using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Controllers;
 
+[Route("testimoniale")]
 public class TestimonialController : Controller
 {
     private readonly ITestimonialService _testimonialService;
@@ -12,6 +13,7 @@ public class TestimonialController : Controller
         _testimonialService = testimonialService;
     }
 
+    [Route("")]
     public async Task<IActionResult> Index()
     {
         var testimonials = await _testimonialService.GetApprovedAsync();

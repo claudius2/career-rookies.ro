@@ -4,6 +4,7 @@ using CareerRookies.Web.ViewModels;
 
 namespace CareerRookies.Web.Controllers;
 
+[Route("articole")]
 public class ArticleController : Controller
 {
     private readonly IArticleService _articleService;
@@ -17,12 +18,14 @@ public class ArticleController : Controller
         _recaptchaService = recaptchaService;
     }
 
+    [Route("")]
     public async Task<IActionResult> Index(int page = 1)
     {
         var articles = await _articleService.GetApprovedAsync(page);
         return View(articles);
     }
 
+    [Route("detalii/{id:int}")]
     public async Task<IActionResult> Detail(int id)
     {
         var article = await _articleService.GetApprovedByIdAsync(id);
@@ -30,7 +33,7 @@ public class ArticleController : Controller
         return View(article);
     }
 
-    [Route("Article/{slug}")]
+    [Route("{slug}")]
     public async Task<IActionResult> DetailBySlug(string slug)
     {
         var article = await _articleService.GetBySlugAsync(slug);
@@ -38,6 +41,7 @@ public class ArticleController : Controller
         return View("Detail", article);
     }
 
+    [Route("trimite")]
     public IActionResult Submit()
     {
         ViewBag.RecaptchaSiteKey = _recaptchaService.SiteKey;
@@ -46,6 +50,7 @@ public class ArticleController : Controller
     }
 
     [HttpPost]
+    [Route("trimite")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Submit(ArticleSubmitViewModel model)
     {
@@ -66,7 +71,7 @@ public class ArticleController : Controller
         var sanitizedContent = _htmlSanitizer.Sanitize(model.Content);
         await _articleService.SubmitAsync(model.Title, sanitizedContent, model.AuthorName);
 
-        TempData["Success"] = "Articolul a fost trimis si va fi revizuit de echipa noastra.";
+        TempData["Success"] = "Articolul a fost trimis și va fi revizuit de echipa noastră.";
         return RedirectToAction("Index");
     }
 }

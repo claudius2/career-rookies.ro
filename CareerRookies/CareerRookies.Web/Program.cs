@@ -141,7 +141,7 @@ try
     }
     else
     {
-        app.UseExceptionHandler("/Home/Error");
+        app.UseExceptionHandler("/eroare");
         app.UseHsts();
     }
 

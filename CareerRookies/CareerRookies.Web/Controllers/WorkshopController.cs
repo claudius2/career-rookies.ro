@@ -5,6 +5,7 @@ using CareerRookies.Web.ViewModels;
 
 namespace CareerRookies.Web.Controllers;
 
+[Route("workshopuri")]
 public class WorkshopController : Controller
 {
     private readonly IWorkshopService _workshopService;
@@ -18,18 +19,21 @@ public class WorkshopController : Controller
         _recaptchaService = recaptchaService;
     }
 
+    [Route("viitoare")]
     public async Task<IActionResult> Upcoming(int page = 1)
     {
         var workshops = await _workshopService.GetUpcomingAsync(page);
         return View(workshops);
     }
 
+    [Route("trecute")]
     public async Task<IActionResult> Past(int page = 1)
     {
         var workshops = await _workshopService.GetPastAsync(page);
         return View(workshops);
     }
 
+    [Route("detalii/{id:int}")]
     public async Task<IActionResult> Detail(int id)
     {
         var workshop = await _workshopService.GetWithMediaAsync(id);
@@ -50,7 +54,7 @@ public class WorkshopController : Controller
         return View(model);
     }
 
-    [Route("Workshop/{slug}")]
+    [Route("{slug}")]
     public async Task<IActionResult> DetailBySlug(string slug)
     {
         var workshop = await _workshopService.GetBySlugAsync(slug);
@@ -72,6 +76,7 @@ public class WorkshopController : Controller
     }
 
     [HttpPost]
+    [Route("inscriere")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(WorkshopRegistrationViewModel model)
     {
@@ -92,14 +97,14 @@ public class WorkshopController : Controller
 
         if (workshop.Date <= DateTime.UtcNow)
         {
-            TempData["Error"] = "Nu te poti inscrie la un workshop care a trecut.";
+            TempData["Error"] = "Nu te poți înscrie la un workshop care a trecut.";
             return RedirectToAction("Detail", new { id = model.WorkshopId });
         }
 
         var canRegister = await _workshopService.CanRegisterAsync(model.WorkshopId, model.StudentName, model.StudentClassId);
         if (!canRegister)
         {
-            TempData["Error"] = "Nu te mai poti inscrie la acest workshop (esti deja inscris sau workshop-ul este plin).";
+            TempData["Error"] = "Nu te mai poți înscrie la acest workshop (ești deja înscris sau workshop-ul este plin).";
             return RedirectToAction("Detail", new { id = model.WorkshopId });
         }
 
@@ -113,7 +118,7 @@ public class WorkshopController : Controller
 
         await _workshopService.RegisterAsync(registration);
 
-        TempData["Success"] = "Inscrierea a fost realizata cu succes!";
+        TempData["Success"] = "Înscrierea a fost realizată cu succes!";
         return RedirectToAction("Detail", new { id = model.WorkshopId });
     }
 

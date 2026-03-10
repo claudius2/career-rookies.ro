@@ -25,7 +25,7 @@ public class SecurityHeadersMiddleware
             "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.tiny.cloud; " +
             "img-src 'self' data: https: blob:; " +
             "frame-src https://www.youtube.com https://youtube.com https://www.google.com https://recaptcha.google.com; " +
-            "connect-src 'self' https://cdn.tiny.cloud;";
+            "connect-src 'self' https://cdn.jsdelivr.net https://cdn.tiny.cloud;";
 
         await _next(context);
     }

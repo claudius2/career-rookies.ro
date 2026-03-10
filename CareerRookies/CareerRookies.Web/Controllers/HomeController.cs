@@ -4,6 +4,7 @@ using CareerRookies.Web.ViewModels;
 
 namespace CareerRookies.Web.Controllers;
 
+[Route("")]
 public class HomeController : Controller
 {
     private readonly IWorkshopService _workshopService;
@@ -23,6 +24,8 @@ public class HomeController : Controller
         _resourceService = resourceService;
     }
 
+    [Route("")]
+    [Route("acasa")]
     public async Task<IActionResult> Index()
     {
         var model = new HomeViewModel
@@ -35,12 +38,14 @@ public class HomeController : Controller
         return View(model);
     }
 
+    [Route("eroare")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
         return View();
     }
 
+    [Route("cauta")]
     public async Task<IActionResult> Search(string? q, int page = 1)
     {
         if (string.IsNullOrWhiteSpace(q))
