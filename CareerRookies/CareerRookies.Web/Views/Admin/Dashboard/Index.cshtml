@@ -5,104 +5,95 @@
 }
 
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Bine ai venit în panoul de administrare</h1>
+    <h1 class="h4 mb-4">Dashboard</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <a href="/Admin/Workshops" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-calendar-event fs-3 text-primary"></i>
+                        <div class="fs-2 fw-bold mt-1">@Model.WorkshopCount</div>
+                        <small class="text-muted">Workshop-uri</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <a href="/Admin/Workshops" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-calendar-check fs-3 text-success"></i>
+                        <div class="fs-2 fw-bold mt-1">@Model.UpcomingWorkshopCount</div>
+                        <small class="text-muted">Viitoare</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <a href="/Admin/Articles" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 @(Model.PendingArticles > 0 ? "border-start border-warning border-3" : "")">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-file-earmark-text fs-3 text-warning"></i>
+                        <div class="fs-2 fw-bold mt-1">@Model.PendingArticles</div>
+                        <small class="text-muted">Articole noi</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-3">
+                    <i class="bi bi-people fs-3 text-info"></i>
+                    <div class="fs-2 fw-bold mt-1">@Model.TotalRegistrations</div>
+                    <small class="text-muted">Înregistrări</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <a href="/Admin/Testimonials" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-chat-quote fs-3 text-secondary"></i>
+                        <div class="fs-2 fw-bold mt-1">@Model.TestimonialCount</div>
+                        <small class="text-muted">Testimoniale</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <a href="/Admin/Resources" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-link-45deg fs-3 text-danger"></i>
+                        <div class="fs-2 fw-bold mt-1">@Model.ResourceCount</div>
+                        <small class="text-muted">Resurse</small>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card border-start border-primary border-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-calendar-event fs-1 text-primary"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h2 class="mb-0">@Model.WorkshopCount</h2>
-                            <p class="text-muted mb-0">Workshop-uri totale</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-start border-success border-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-calendar-check fs-1 text-success"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h2 class="mb-0">@Model.UpcomingWorkshopCount</h2>
-                            <p class="text-muted mb-0">Workshop-uri viitoare</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-start border-warning border-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-file-earmark-text fs-1 text-warning"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h2 class="mb-0">@Model.PendingArticles</h2>
-                            <p class="text-muted mb-0">Articole în așteptare</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-start border-info border-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-people fs-1 text-info"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h2 class="mb-0">@Model.TotalRegistrations</h2>
-                            <p class="text-muted mb-0">Înregistrări totale</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-start border-secondary border-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-chat-quote fs-1 text-secondary"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h2 class="mb-0">@Model.TestimonialCount</h2>
-                            <p class="text-muted mb-0">Testimoniale</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-start border-danger border-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-link-45deg fs-1 text-danger"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h2 class="mb-0">@Model.ResourceCount</h2>
-                            <p class="text-muted mb-0">Resurse</p>
-                        </div>
-                    </div>
-                </div>
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h6 class="fw-bold mb-3">Acțiuni rapide</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/Admin/Workshops/Create" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus me-1"></i> Workshop nou
+                </a>
+                <a href="/Admin/Testimonials/Create" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus me-1"></i> Testimonial nou
+                </a>
+                <a href="/Admin/Resources/Create" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus me-1"></i> Resursă nouă
+                </a>
+                <a href="/Admin/StudentClasses" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-people me-1"></i> Clase elevi
+                </a>
+                <a href="/Admin/Settings" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-gear me-1"></i> Setări
+                </a>
             </div>
         </div>
     </div>

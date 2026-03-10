@@ -9,14 +9,6 @@
         <h1 class="h3 mb-0">Setari Site</h1>
     </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
-        </div>
-    }
-
     <div class="card">
         <div class="card-body">
             @if (Model.Any())
