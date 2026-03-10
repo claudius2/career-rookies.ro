@@ -41,7 +41,7 @@
                                     }
                                 </div>
                                 <p class="card-text">
-                                    @(workshop.Description.Length > 150 ? workshop.Description[..150] + "..." : workshop.Description)
+                                    @TextHelper.Truncate(workshop.Description, 150)
                                 </p>
                                 <div class="mt-auto pt-2">
                                     <a asp-controller="Workshop" asp-action="Detail" asp-route-id="@workshop.Id" class="btn btn-primary-cr">

@@ -112,45 +112,67 @@
     @if (Model.IsUpcoming)
     {
         <!-- Formular de Înscriere -->
-        <section class="page-section">
+        <section class="page-section" id="inscriere">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
                     <div class="card card-cr">
                         <div class="card-body p-4 p-md-5">
                             <div class="section-title">
                                 <h2>Înscrie-te la workshop</h2>
                             </div>
-                            <form asp-controller="Workshop" asp-action="Register" method="post">
+                            <form action="/workshopuri/inscriere" method="post">
+                                @Html.AntiForgeryToken()
                                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                                <input type="hidden" asp-for="Registration.WorkshopId" value="@Model.Workshop.Id" />
+                                <input type="hidden" name="WorkshopId" value="@Model.Workshop.Id" />
 
                                 <div class="mb-3">
-                                    <label asp-for="Registration.StudentName" class="form-label"></label>
-                                    <input asp-for="Registration.StudentName" class="form-control form-control-lg" placeholder="Introdu numele tău complet" />
-                                    <span asp-validation-for="Registration.StudentName" class="text-danger"></span>
+                                    <label for="StudentName" class="form-label">Nume complet</label>
+                                    <input type="text" id="StudentName" name="StudentName" value="@Model.Registration?.StudentName"
+                                           class="form-control form-control-lg" placeholder="Introdu numele tău complet" required />
                                 </div>
 
                                 <div class="mb-3">
-                                    <label asp-for="Registration.StudentClassId" class="form-label">Clasa</label>
-                                    <select asp-for="Registration.StudentClassId" class="form-select form-select-lg">
+                                    <label for="StudentClassId" class="form-label">Clasa</label>
+                                    <select id="StudentClassId" name="StudentClassId" class="form-select form-select-lg" required>
                                         <option value="">-- Selectează clasa --</option>
                                         @foreach (var studentClass in Model.StudentClasses)
                                         {
-                                            <option value="@studentClass.Id">@studentClass.Name</option>
+                                            var isSelected = Model.Registration?.StudentClassId == studentClass.Id;
+                                            if (isSelected)
+                                            {
+                                                <option value="@studentClass.Id" selected>@studentClass.Name</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@studentClass.Id">@studentClass.Name</option>
+                                            }
                                         }
                                     </select>
-                                    <span asp-validation-for="Registration.StudentClassId" class="text-danger"></span>
                                 </div>
 
                                 <div class="mb-4">
                                     <div class="form-check">
-                                        <input asp-for="Registration.GdprConsentAccepted" class="form-check-input" type="checkbox" />
-                                        <label asp-for="Registration.GdprConsentAccepted" class="form-check-label">
+                                        <input type="checkbox" id="GdprConsentAccepted" name="GdprConsentAccepted" value="true"
+                                               class="form-check-input" required />
+                                        <label for="GdprConsentAccepted" class="form-check-label">
                                             Accept prelucrarea datelor personale conform
-                                            <a asp-controller="Legal" asp-action="Privacy" target="_blank">Politicii de Confidențialitate</a>
+                                            <a href="/legal/confidentialitate" target="_blank">Politicii de Confidențialitate</a>
                                         </label>
                                     </div>
-                                    <span asp-validation-for="Registration.GdprConsentAccepted" class="text-danger"></span>
                                 </div>
 
                                 <div class="d-grid">
@@ -162,6 +184,11 @@
                                                 data-action="register">
                                             <i class="bi bi-send me-2"></i>Trimite înscrierea
                                         </button>
+                                        <small class="text-muted text-center mt-2">
+                                            Protejat de reCAPTCHA Google
+                                            (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Confidențialitate</a> &middot;
+                                            <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Termeni</a>)
+                                        </small>
                                     }
                                     else
                                     {

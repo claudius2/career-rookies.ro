@@ -98,14 +98,14 @@ public class WorkshopController : Controller
         if (workshop.Date <= DateTime.UtcNow)
         {
             TempData["Error"] = "Nu te poți înscrie la un workshop care a trecut.";
-            return RedirectToAction("Detail", new { id = model.WorkshopId });
+            return Redirect($"/workshopuri/detalii/{model.WorkshopId}#inscriere");
         }
 
         var canRegister = await _workshopService.CanRegisterAsync(model.WorkshopId, model.StudentName, model.StudentClassId);
         if (!canRegister)
         {
             TempData["Error"] = "Nu te mai poți înscrie la acest workshop (ești deja înscris sau workshop-ul este plin).";
-            return RedirectToAction("Detail", new { id = model.WorkshopId });
+            return Redirect($"/workshopuri/detalii/{model.WorkshopId}#inscriere");
         }
 
         var registration = new WorkshopRegistration
@@ -118,8 +118,8 @@ public class WorkshopController : Controller
 
         await _workshopService.RegisterAsync(registration);
 
-        TempData["Success"] = "Înscrierea a fost realizată cu succes!";
-        return RedirectToAction("Detail", new { id = model.WorkshopId });
+        TempData["Success"] = "Înscrierea a fost realizată cu succes! Te așteptăm la workshop!";
+        return Redirect($"/workshopuri/detalii/{model.WorkshopId}#inscriere");
     }
 
     private async Task<IActionResult> ReloadDetailView(WorkshopRegistrationViewModel model)
