@@ -90,6 +90,7 @@ public class WorkshopService : IWorkshopService
         var query = _context.Workshops
             .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
                 .ThenInclude(ws => ws.Speaker)
+            .Include(w => w.Registrations)
             .Where(w => !w.IsDeleted)
             .OrderByDescending(w => w.Date);
 
@@ -201,6 +202,14 @@ public class WorkshopService : IWorkshopService
         }
 
         return Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+    }
+
+    public async Task DeleteRegistrationAsync(int registrationId)
+    {
+        var registration = await _context.WorkshopRegistrations.FindAsync(registrationId);
+        if (registration == null) return;
+        _context.WorkshopRegistrations.Remove(registration);
+        await _context.SaveChangesAsync();
     }
 
     public async Task SetWorkshopSpeakersAsync(int workshopId, List<int> speakerIds)

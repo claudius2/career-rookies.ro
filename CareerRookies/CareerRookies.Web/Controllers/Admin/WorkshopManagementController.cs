@@ -281,6 +281,17 @@ public class WorkshopManagementController : Controller
         return File(csvBytes, "text/csv", $"registrations-workshop-{workshopId}.csv");
     }
 
+    [HttpPost]
+    [Route("Registrations/{workshopId}/Delete/{registrationId}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteRegistration(int workshopId, int registrationId)
+    {
+        await _workshopService.DeleteRegistrationAsync(registrationId);
+        await _auditService.LogAsync("WorkshopRegistration", registrationId, "Deleted", User.Identity?.Name);
+        TempData["Success"] = "Înregistrarea a fost ștearsă.";
+        return RedirectToAction("Registrations", new { workshopId });
+    }
+
     [Route("Media/{workshopId}")]
     public async Task<IActionResult> Media(int workshopId)
     {

@@ -71,7 +71,7 @@ public class ArticleController : Controller
         var sanitizedContent = _htmlSanitizer.Sanitize(model.Content);
         await _articleService.SubmitAsync(model.Title, sanitizedContent, model.AuthorName);
 
-        TempData["Success"] = "Articolul a fost trimis și va fi revizuit de echipa noastră.";
-        return RedirectToAction("Index");
+        TempData["Success"] = "Articolul a fost trimis cu succes! Echipa noastră îl va revizui în curând.";
+        return RedirectToAction("Submit");
     }
 }
