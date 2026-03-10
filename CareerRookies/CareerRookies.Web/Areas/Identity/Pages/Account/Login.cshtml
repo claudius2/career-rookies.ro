@@ -24,8 +24,12 @@
                 <div class="card shadow-lg border-0" style="border-radius: var(--cr-radius);">
                     <div class="card-body p-4 p-md-5">
 
-                        <form id="account" method="post" asp-page="/Account/Login" asp-area="Identity" asp-route-returnUrl="@Model.ReturnUrl">
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="border-radius: var(--cr-radius-sm);"></div>
+                        <form id="account" method="post">
+                            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="border-radius: var(--cr-radius-sm);"></div>
+                            }
 
                             <!-- Email -->
                             <div class="mb-3">
