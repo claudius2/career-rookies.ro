@@ -18,7 +18,7 @@ public class ArticleController : Controller
     public async Task<IActionResult> Index()
     {
         var articles = await _context.Articles
-            .Where(a => a.IsApproved)
+            .Where(a => a.Status == ArticleStatus.Approved)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
         return View(articles);
@@ -26,7 +26,8 @@ public class ArticleController : Controller
 
     public async Task<IActionResult> Detail(int id)
     {
-        var article = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id && a.IsApproved);
+        var article = await _context.Articles
+            .FirstOrDefaultAsync(a => a.Id == id && a.Status == ArticleStatus.Approved);
         if (article == null) return NotFound();
         return View(article);
     }
@@ -47,9 +48,9 @@ public class ArticleController : Controller
             Title = model.Title,
             Content = model.Content,
             AuthorName = model.AuthorName,
-            IsApproved = false,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            Status = ArticleStatus.Pending,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         _context.Articles.Add(article);

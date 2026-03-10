@@ -16,19 +16,20 @@ public class WorkshopRegistration
     public string StudentName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Clasa este obligatorie.")]
-    [MaxLength(50)]
     [Display(Name = "Clasa")]
-    public string StudentClass { get; set; } = string.Empty;
+    public int StudentClassId { get; set; }
 
-    [Required(ErrorMessage = "Consimtamantul GDPR este obligatoriu.")]
-    [Display(Name = "Consimtamant GDPR")]
+    [Required(ErrorMessage = "Consimțământul GDPR este obligatoriu.")]
+    [Range(typeof(bool), "true", "true", ErrorMessage = "Trebuie să accepți termenii GDPR.")]
+    [Display(Name = "Consimțământ GDPR")]
     public bool GdprConsentAccepted { get; set; }
 
     [Display(Name = "Document GDPR")]
     public string? GdprDocumentPath { get; set; }
 
-    [Display(Name = "Inregistrat la")]
+    [Display(Name = "Înregistrat la")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Workshop Workshop { get; set; } = null!;
+    public StudentClass StudentClass { get; set; } = null!;
 }

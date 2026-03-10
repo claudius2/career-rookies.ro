@@ -15,6 +15,7 @@ public class CareerResource
     [MaxLength(500)]
     [Display(Name = "URL")]
     [DataType(DataType.Url)]
+    [Url(ErrorMessage = "URL-ul nu este valid.")]
     public string Url { get; set; } = string.Empty;
 
     [Required]

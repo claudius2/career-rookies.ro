@@ -1,4 +1,5 @@
 @model List<Article>
+@using CareerRookies.Web.Models
 @{
     ViewData["Title"] = "Gestionare Articole";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -8,14 +9,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Gestionare Articole</h1>
     </div>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Inchide"></button>
-        </div>
-    }
 
     <div class="card">
         <div class="card-body">
@@ -29,7 +22,7 @@
                                 <th>Autor</th>
                                 <th>Data</th>
                                 <th>Status</th>
-                                <th class="text-end">Actiuni</th>
+                                <th class="text-end">Acțiuni</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,27 +33,31 @@
                                     <td>@article.AuthorName</td>
                                     <td>@article.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
                                     <td>
-                                        @if (article.IsApproved)
+                                        @switch (article.Status)
                                         {
-                                            <span class="badge bg-success">Aprobat</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning text-dark">In asteptare</span>
+                                            case ArticleStatus.Approved:
+                                                <span class="badge bg-success">Aprobat</span>
+                                                break;
+                                            case ArticleStatus.Rejected:
+                                                <span class="badge bg-danger">Respins</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-warning text-dark">În așteptare</span>
+                                                break;
                                         }
                                     </td>
                                     <td class="text-end">
-                                        @if (!article.IsApproved)
+                                        @if (article.Status != ArticleStatus.Approved)
                                         {
                                             <form action="/Admin/Articles/Approve/@article.Id"
                                                   method="post" class="d-inline">
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Aproba">
-                                                    <i class="bi bi-check-lg"></i> Aproba
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Aprobă">
+                                                    <i class="bi bi-check-lg"></i> Aprobă
                                                 </button>
                                             </form>
                                         }
-                                        else
+                                        @if (article.Status != ArticleStatus.Rejected)
                                         {
                                             <form action="/Admin/Articles/Reject/@article.Id"
                                                   method="post" class="d-inline">
@@ -72,10 +69,10 @@
                                         }
                                         <form action="/Admin/Articles/Delete/@article.Id"
                                               method="post" class="d-inline ms-1"
-                                              onsubmit="return confirm('Sigur doriti sa stergeti acest articol?');">
+                                              onsubmit="return confirm('Sigur doriți să ștergeți acest articol?');">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Sterge">
-                                                <i class="bi bi-trash"></i> Sterge
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Șterge">
+                                                <i class="bi bi-trash"></i> Șterge
                                             </button>
                                         </form>
                                     </td>
@@ -89,7 +86,7 @@
             {
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-file-earmark-text fs-1 d-block mb-3"></i>
-                    <p>Nu exista articole.</p>
+                    <p>Nu există articole.</p>
                 </div>
             }
         </div>

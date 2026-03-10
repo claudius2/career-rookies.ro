@@ -20,7 +20,9 @@ public class StudentClassManagementController : Controller
     [Route("")]
     public async Task<IActionResult> Index()
     {
-        var classes = await _context.StudentClasses.ToListAsync();
+        var classes = await _context.StudentClasses
+            .OrderBy(sc => sc.Name)
+            .ToListAsync();
         return View("~/Views/Admin/StudentClass/Index.cshtml", classes);
     }
 
@@ -33,7 +35,7 @@ public class StudentClassManagementController : Controller
     [HttpPost]
     [Route("Create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(StudentClass model)
+    public async Task<IActionResult> Create([Bind("Name,IsActive")] StudentClass model)
     {
         if (!ModelState.IsValid)
             return View("~/Views/Admin/StudentClass/Create.cshtml", model);
@@ -55,7 +57,7 @@ public class StudentClassManagementController : Controller
     [HttpPost]
     [Route("Edit/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, StudentClass model)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,IsActive")] StudentClass model)
     {
         if (id != model.Id) return NotFound();
         var sc = await _context.StudentClasses.FindAsync(id);

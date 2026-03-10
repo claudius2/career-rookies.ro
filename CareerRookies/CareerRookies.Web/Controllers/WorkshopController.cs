@@ -18,7 +18,7 @@ public class WorkshopController : Controller
     public async Task<IActionResult> Upcoming()
     {
         var workshops = await _context.Workshops
-            .Where(w => w.Date > DateTime.Now)
+            .Where(w => w.Date > DateTime.UtcNow)
             .OrderBy(w => w.Date)
             .ToListAsync();
         return View(workshops);
@@ -27,7 +27,7 @@ public class WorkshopController : Controller
     public async Task<IActionResult> Past()
     {
         var workshops = await _context.Workshops
-            .Where(w => w.Date <= DateTime.Now)
+            .Where(w => w.Date <= DateTime.UtcNow)
             .OrderByDescending(w => w.Date)
             .ToListAsync();
         return View(workshops);
@@ -37,7 +37,6 @@ public class WorkshopController : Controller
     {
         var workshop = await _context.Workshops
             .Include(w => w.Media.OrderBy(m => m.SortOrder))
-            .Include(w => w.Registrations)
             .FirstOrDefaultAsync(w => w.Id == id);
 
         if (workshop == null) return NotFound();
@@ -61,29 +60,38 @@ public class WorkshopController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var workshop = await _context.Workshops
-                .Include(w => w.Media.OrderBy(m => m.SortOrder))
-                .FirstOrDefaultAsync(w => w.Id == model.WorkshopId);
+            return await ReloadDetailView(model);
+        }
 
-            if (workshop == null) return NotFound();
+        var workshop = await _context.Workshops.FindAsync(model.WorkshopId);
+        if (workshop == null) return NotFound();
 
-            var detailModel = new WorkshopDetailViewModel
-            {
-                Workshop = workshop,
-                Media = workshop.Media.ToList(),
-                StudentClasses = await _context.StudentClasses.Where(sc => sc.IsActive).ToListAsync(),
-                Registration = model
-            };
-            return View("Detail", detailModel);
+        // Prevent registration for past workshops
+        if (workshop.Date <= DateTime.UtcNow)
+        {
+            TempData["Error"] = "Nu te poți înscrie la un workshop care a trecut.";
+            return RedirectToAction("Detail", new { id = model.WorkshopId });
+        }
+
+        // Prevent duplicate registrations
+        var alreadyRegistered = await _context.WorkshopRegistrations
+            .AnyAsync(r => r.WorkshopId == model.WorkshopId
+                        && r.StudentName == model.StudentName
+                        && r.StudentClassId == model.StudentClassId);
+
+        if (alreadyRegistered)
+        {
+            TempData["Error"] = "Ești deja înscris la acest workshop.";
+            return RedirectToAction("Detail", new { id = model.WorkshopId });
         }
 
         var registration = new WorkshopRegistration
         {
             WorkshopId = model.WorkshopId,
             StudentName = model.StudentName,
-            StudentClass = model.StudentClass,
+            StudentClassId = model.StudentClassId,
             GdprConsentAccepted = model.GdprConsentAccepted,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow
         };
 
         _context.WorkshopRegistrations.Add(registration);
@@ -91,5 +99,23 @@ public class WorkshopController : Controller
 
         TempData["Success"] = "Înscrierea a fost realizată cu succes!";
         return RedirectToAction("Detail", new { id = model.WorkshopId });
+    }
+
+    private async Task<IActionResult> ReloadDetailView(WorkshopRegistrationViewModel model)
+    {
+        var workshop = await _context.Workshops
+            .Include(w => w.Media.OrderBy(m => m.SortOrder))
+            .FirstOrDefaultAsync(w => w.Id == model.WorkshopId);
+
+        if (workshop == null) return NotFound();
+
+        var detailModel = new WorkshopDetailViewModel
+        {
+            Workshop = workshop,
+            Media = workshop.Media.ToList(),
+            StudentClasses = await _context.StudentClasses.Where(sc => sc.IsActive).ToListAsync(),
+            Registration = model
+        };
+        return View("Detail", detailModel);
     }
 }

@@ -33,15 +33,6 @@
 </section>
 
 <div class="container">
-    <!-- Success Message -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-cr-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Închide"></button>
-        </div>
-    }
-
     <!-- Descriere -->
     <section class="page-section">
         <div class="row">
@@ -49,9 +40,7 @@
                 <div class="section-title text-start">
                     <h2>Despre acest workshop</h2>
                 </div>
-                <div class="workshop-description">
-                    @Html.Raw(Model.Workshop.Description)
-                </div>
+                <div class="workshop-description" style="white-space: pre-wrap;">@Model.Workshop.Description</div>
             </div>
             <div class="col-lg-4">
                 <div class="card card-cr">
@@ -109,7 +98,7 @@
             </div>
             <div class="col-md-9">
                 <h4 class="fw-bold" style="color: var(--cr-primary-dark);">@Model.Workshop.SpeakerName</h4>
-                <p>@Html.Raw(Model.Workshop.SpeakerDescription)</p>
+                <p style="white-space: pre-wrap;">@Model.Workshop.SpeakerDescription</p>
             </div>
         </div>
     </section>
@@ -136,15 +125,15 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label asp-for="Registration.StudentClass" class="form-label"></label>
-                                    <select asp-for="Registration.StudentClass" class="form-select form-select-lg">
+                                    <label asp-for="Registration.StudentClassId" class="form-label">Clasa</label>
+                                    <select asp-for="Registration.StudentClassId" class="form-select form-select-lg">
                                         <option value="">-- Selectează clasa --</option>
                                         @foreach (var studentClass in Model.StudentClasses)
                                         {
-                                            <option value="@studentClass.Name">@studentClass.Name</option>
+                                            <option value="@studentClass.Id">@studentClass.Name</option>
                                         }
                                     </select>
-                                    <span asp-validation-for="Registration.StudentClass" class="text-danger"></span>
+                                    <span asp-validation-for="Registration.StudentClassId" class="text-danger"></span>
                                 </div>
 
                                 <div class="mb-4">

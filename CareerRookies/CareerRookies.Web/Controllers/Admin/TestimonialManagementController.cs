@@ -35,12 +35,12 @@ public class TestimonialManagementController : Controller
     [HttpPost]
     [Route("Create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Testimonial model)
+    public async Task<IActionResult> Create([Bind("Text,AuthorName,AuthorType,SortOrder")] Testimonial model)
     {
         if (!ModelState.IsValid)
             return View("~/Views/Admin/Testimonial/Create.cshtml", model);
 
-        model.CreatedAt = DateTime.Now;
+        model.CreatedAt = DateTime.UtcNow;
         _context.Testimonials.Add(model);
         await _context.SaveChangesAsync();
         TempData["Success"] = "Testimonialul a fost creat.";
@@ -58,7 +58,7 @@ public class TestimonialManagementController : Controller
     [HttpPost]
     [Route("Edit/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Testimonial model)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Text,AuthorName,AuthorType,SortOrder")] Testimonial model)
     {
         if (id != model.Id) return NotFound();
         var testimonial = await _context.Testimonials.FindAsync(id);

@@ -19,3 +19,10 @@ public enum ResourceCategory
     GuidanceFirm,
     EUProject
 }
+
+public enum ArticleStatus
+{
+    Pending,
+    Approved,
+    Rejected
+}

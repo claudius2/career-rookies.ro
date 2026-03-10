@@ -33,8 +33,7 @@ public class ArticleManagementController : Controller
     {
         var article = await _context.Articles.FindAsync(id);
         if (article == null) return NotFound();
-        article.IsApproved = true;
-        article.UpdatedAt = DateTime.Now;
+        article.Status = ArticleStatus.Approved;
         await _context.SaveChangesAsync();
         TempData["Success"] = "Articolul a fost aprobat.";
         return RedirectToAction("Index");
@@ -47,8 +46,7 @@ public class ArticleManagementController : Controller
     {
         var article = await _context.Articles.FindAsync(id);
         if (article == null) return NotFound();
-        article.IsApproved = false;
-        article.UpdatedAt = DateTime.Now;
+        article.Status = ArticleStatus.Rejected;
         await _context.SaveChangesAsync();
         TempData["Success"] = "Articolul a fost respins.";
         return RedirectToAction("Index");

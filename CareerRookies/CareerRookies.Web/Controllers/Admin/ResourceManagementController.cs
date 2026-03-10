@@ -36,7 +36,7 @@ public class ResourceManagementController : Controller
     [HttpPost]
     [Route("Create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CareerResource model)
+    public async Task<IActionResult> Create([Bind("Name,Url,Category,SortOrder")] CareerResource model)
     {
         if (!ModelState.IsValid)
             return View("~/Views/Admin/Resource/Create.cshtml", model);
@@ -58,7 +58,7 @@ public class ResourceManagementController : Controller
     [HttpPost]
     [Route("Edit/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, CareerResource model)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Url,Category,SortOrder")] CareerResource model)
     {
         if (id != model.Id) return NotFound();
         var resource = await _context.CareerResources.FindAsync(id);

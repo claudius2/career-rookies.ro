@@ -21,6 +21,32 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<CareerResource> CareerResources => Set<CareerResource>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
 
+    public override int SaveChanges()
+    {
+        UpdateTimestamps();
+        return base.SaveChanges();
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateTimestamps();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void UpdateTimestamps()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified);
+
+        foreach (var entry in entries)
+        {
+            if (entry.Entity is Workshop workshop)
+                workshop.UpdatedAt = DateTime.UtcNow;
+            else if (entry.Entity is Article article)
+                article.UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -67,6 +93,14 @@ public class ApplicationDbContext : IdentityDbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        builder.Entity<WorkshopRegistration>(entity =>
+        {
+            entity.HasOne(r => r.StudentClass)
+                .WithMany()
+                .HasForeignKey(r => r.StudentClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         builder.Entity<SiteSetting>(entity =>
         {
             entity.HasIndex(s => s.Key).IsUnique();
@@ -75,19 +109,29 @@ public class ApplicationDbContext : IdentityDbContext
         builder.Entity<WorkshopMedia>(entity =>
         {
             entity.Property(m => m.MediaType)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasMaxLength(50);
         });
 
         builder.Entity<Testimonial>(entity =>
         {
             entity.Property(t => t.AuthorType)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasMaxLength(50);
         });
 
         builder.Entity<CareerResource>(entity =>
         {
             entity.Property(r => r.Category)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasMaxLength(50);
+        });
+
+        builder.Entity<Article>(entity =>
+        {
+            entity.Property(a => a.Status)
+                .HasConversion<string>()
+                .HasMaxLength(50);
         });
     }
 }

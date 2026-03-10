@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using CareerRookies.Web.Models;
 
 namespace CareerRookies.Web.Data;
@@ -11,9 +12,10 @@ public static class SeedData
         var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var config = serviceProvider.GetRequiredService<IConfiguration>();
+        var logger = serviceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
 
         await SeedRolesAsync(roleManager);
-        await SeedAdminUserAsync(userManager, config);
+        await SeedAdminUserAsync(userManager, config, logger);
         await SeedStudentClassesAsync(context);
         await SeedSiteSettingsAsync(context);
         await SeedCareerResourcesAsync(context);
@@ -31,7 +33,7 @@ public static class SeedData
         }
     }
 
-    private static async Task SeedAdminUserAsync(UserManager<IdentityUser> userManager, IConfiguration config)
+    private static async Task SeedAdminUserAsync(UserManager<IdentityUser> userManager, IConfiguration config, ILogger logger)
     {
         var adminEmail = config["AdminSettings:Email"] ?? "admin@careerrookies.ro";
         var adminPassword = config["AdminSettings:Password"] ?? "Admin123!";
@@ -49,13 +51,19 @@ public static class SeedData
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(admin, "Admin");
+                logger.LogInformation("Admin user '{Email}' created successfully.", adminEmail);
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                logger.LogError("Failed to create admin user '{Email}': {Errors}", adminEmail, errors);
             }
         }
     }
 
     private static async Task SeedStudentClassesAsync(ApplicationDbContext context)
     {
-        if (context.StudentClasses.Any()) return;
+        if (await context.StudentClasses.AnyAsync()) return;
 
         var classes = new List<StudentClass>
         {
@@ -73,7 +81,7 @@ public static class SeedData
 
     private static async Task SeedSiteSettingsAsync(ApplicationDbContext context)
     {
-        if (context.SiteSettings.Any()) return;
+        if (await context.SiteSettings.AnyAsync()) return;
 
         var settings = new List<SiteSetting>
         {
@@ -90,11 +98,11 @@ public static class SeedData
 
     private static async Task SeedCareerResourcesAsync(ApplicationDbContext context)
     {
-        if (context.CareerResources.Any()) return;
+        if (await context.CareerResources.AnyAsync()) return;
 
         var resources = new List<CareerResource>
         {
-            new() { Name = "RIUF - Pair de universități", Url = "https://www.riuf.ro", Category = ResourceCategory.UniversityFair, SortOrder = 1 },
+            new() { Name = "RIUF - Târg de universități", Url = "https://www.riuf.ro", Category = ResourceCategory.UniversityFair, SortOrder = 1 },
             new() { Name = "EducationUSA", Url = "https://educationusa.state.gov", Category = ResourceCategory.UniversityFair, SortOrder = 2 },
             new() { Name = "Cognitrom", Url = "https://www.cognitrom.ro", Category = ResourceCategory.GuidanceFirm, SortOrder = 1 },
             new() { Name = "Smartree", Url = "https://www.smartree.com", Category = ResourceCategory.GuidanceFirm, SortOrder = 2 },

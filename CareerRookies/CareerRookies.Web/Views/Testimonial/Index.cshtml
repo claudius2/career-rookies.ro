@@ -19,12 +19,11 @@
                         <div class="card card-cr testimonial-card h-100">
                             <p class="testimonial-text">"@testimonial.Text"</p>
                             <div class="testimonial-author">@testimonial.AuthorName</div>
-                            <div class="testimonial-role mb-2">
-                                @(testimonial.AuthorType == AuthorType.Student ? "Elev" : "Speaker")
+                            <div class="mt-2">
+                                <span class="@(testimonial.AuthorType == AuthorType.Student ? "badge-student" : "badge-employer")">
+                                    @(testimonial.AuthorType == AuthorType.Student ? "Elev" : "Speaker")
+                                </span>
                             </div>
-                            <span class="@(testimonial.AuthorType == AuthorType.Student ? "badge-student" : "badge-employer")" style="display: inline-block; margin: 0 auto;">
-                                @(testimonial.AuthorType == AuthorType.Student ? "Elev" : "Speaker")
-                            </span>
                         </div>
                     </div>
                 }

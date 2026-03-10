@@ -13,7 +13,7 @@ public class WorkshopRegistrationViewModel
 
     [Required(ErrorMessage = "Clasa este obligatorie.")]
     [Display(Name = "Clasa")]
-    public string StudentClass { get; set; } = string.Empty;
+    public int StudentClassId { get; set; }
 
     [Required(ErrorMessage = "Trebuie să accepți termenii GDPR.")]
     [Range(typeof(bool), "true", "true", ErrorMessage = "Trebuie să accepți termenii GDPR.")]

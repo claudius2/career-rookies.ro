@@ -11,8 +11,9 @@ public class Article
     [Display(Name = "Titlu")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Continutul este obligatoriu.")]
-    [Display(Name = "Continut")]
+    [Required(ErrorMessage = "Conținutul este obligatoriu.")]
+    [MaxLength(50000)]
+    [Display(Name = "Conținut")]
     public string Content { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Numele autorului este obligatoriu.")]
@@ -20,8 +21,8 @@ public class Article
     [Display(Name = "Nume autor")]
     public string AuthorName { get; set; } = string.Empty;
 
-    [Display(Name = "Aprobat")]
-    public bool IsApproved { get; set; } = false;
+    [Display(Name = "Status")]
+    public ArticleStatus Status { get; set; } = ArticleStatus.Pending;
 
     [Display(Name = "Creat la")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

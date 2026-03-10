@@ -27,16 +27,25 @@ public class SettingsController : Controller
     [HttpPost]
     [Route("Update")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(Dictionary<string, string> settings)
+    public async Task<IActionResult> Update(Dictionary<string, string>? settings)
     {
+        if (settings == null || settings.Count == 0)
+        {
+            TempData["Error"] = "Nu s-au primit date valide.";
+            return RedirectToAction("Index");
+        }
+
+        var allSettings = await _context.SiteSettings.ToListAsync();
+        var settingsDict = allSettings.ToDictionary(s => s.Key, s => s);
+
         foreach (var kvp in settings)
         {
-            var setting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == kvp.Key);
-            if (setting != null)
+            if (settingsDict.TryGetValue(kvp.Key, out var setting))
             {
                 setting.Value = kvp.Value;
             }
         }
+
         await _context.SaveChangesAsync();
         TempData["Success"] = "Setările au fost actualizate.";
         return RedirectToAction("Index");

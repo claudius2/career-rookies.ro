@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/Claudiu/Documents/WORK/RXT IT/2026/career-rookies.ro/CareerRookies\" && dotnet build CareerRookies.Web/CareerRookies.Web.csproj 2>&1)",
+      "Bash(cd \"C:/Users/Claudiu/Documents/WORK/RXT IT/2026/career-rookies.ro/CareerRookies\" && dotnet ef migrations add FixSchemaIssues --project CareerRookies.Web/CareerRookies.Web.csproj 2>&1)"
+    ]
+  }
+}

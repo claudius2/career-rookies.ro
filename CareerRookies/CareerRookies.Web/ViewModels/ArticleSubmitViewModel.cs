@@ -10,6 +10,7 @@ public class ArticleSubmitViewModel
     public string Title { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Conținutul este obligatoriu.")]
+    [MaxLength(50000, ErrorMessage = "Conținutul nu poate depăși 50000 de caractere.")]
     [Display(Name = "Conținut")]
     public string Content { get; set; } = string.Empty;
 
