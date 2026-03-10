@@ -1,4 +1,4 @@
-@model ErrorViewModel
+@model ErrorViewModel?
 @{
     ViewData["Title"] = "Eroare";
 }
@@ -9,12 +9,12 @@
             <div class="col-lg-6 text-center">
                 <div class="py-5">
                     <i class="bi bi-exclamation-triangle text-danger" style="font-size: 5rem;"></i>
-                    <h1 class="section-title mt-4 mb-3">Oops! A apărut o eroare.</h1>
+                    <h1 class="section-title mt-4 mb-3">Oops! A aparut o eroare.</h1>
                     <p class="text-muted fs-5 mb-4">
-                        Ne pare rău, dar ceva nu a funcționat corect. Te rugăm să încerci din nou.
+                        Ne pare rau, dar ceva nu a functionat corect. Te rugam sa incerci din nou.
                     </p>
 
-                    @if (Model.ShowRequestId)
+                    @if (Model?.ShowRequestId == true)
                     {
                         <p class="text-muted small">
                             <strong>Request ID:</strong> <code>@Model.RequestId</code>
@@ -22,7 +22,7 @@
                     }
 
                     <a asp-controller="Home" asp-action="Index" class="btn btn-primary-cr btn-lg mt-3">
-                        <i class="bi bi-house me-2"></i>Înapoi la pagina principală
+                        <i class="bi bi-house me-2"></i>Inapoi la pagina principala
                     </a>
                 </div>
             </div>

@@ -4,7 +4,11 @@
       "Bash(cd \"C:/Users/Claudiu/Documents/WORK/RXT IT/2026/career-rookies.ro/CareerRookies\" && dotnet build CareerRookies.Web/CareerRookies.Web.csproj 2>&1)",
       "Bash(cd \"C:/Users/Claudiu/Documents/WORK/RXT IT/2026/career-rookies.ro/CareerRookies\" && dotnet ef migrations add FixSchemaIssues --project CareerRookies.Web/CareerRookies.Web.csproj 2>&1)",
       "Bash(sc query:*)",
-      "Bash(powershell -Command \"Get-Service | Where-Object { \\\\$_.Name -like '*MSSQL*' } | Select-Object Name, Status | Format-Table -AutoSize\")"
+      "Bash(powershell -Command \"Get-Service | Where-Object { \\\\$_.Name -like '*MSSQL*' } | Select-Object Name, Status | Format-Table -AutoSize\")",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && mkdir -p Services/Interfaces && mkdir -p Middleware && mkdir -p ViewModels/Admin && ls Services/ Middleware/ ViewModels/Admin/)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet restore 2>&1 && dotnet build --no-restore 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet build 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet ef migrations add ArchitectureImprovements --context ApplicationDbContext 2>&1)"
     ]
   }
 }

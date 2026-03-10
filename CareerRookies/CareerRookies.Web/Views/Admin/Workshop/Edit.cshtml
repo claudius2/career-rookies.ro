@@ -1,4 +1,4 @@
-@model Workshop
+@model CareerRookies.Web.ViewModels.Admin.WorkshopFormViewModel
 @{
     ViewData["Title"] = "Editeaza Workshop";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -42,12 +42,19 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Imagine workshop</label>
-                            <input type="file" name="image" class="form-control" accept="image/*" />
-                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            <label asp-for="MaxCapacity" class="form-label"></label>
+                            <input asp-for="MaxCapacity" type="number" class="form-control" min="0" placeholder="Lasati gol pentru nelimitat" />
+                            <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label">Imagine workshop</label>
+                            <input asp-for="Image" class="form-control" accept="image/*" />
+                            <span asp-validation-for="Image" class="text-danger"></span>
+                            @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
                             {
                                 <div class="mt-2">
-                                    <img src="@Model.ImagePath" alt="Imagine curenta" class="img-thumbnail" style="max-height: 150px;" />
+                                    <img src="@Model.ExistingImagePath" alt="Imagine curenta" class="img-thumbnail" style="max-height: 150px;" />
                                     <small class="d-block text-muted mt-1">Imagine curenta. Incarcati una noua pentru a o inlocui.</small>
                                 </div>
                             }
@@ -75,12 +82,13 @@
 
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label">Imagine speaker</label>
-                            <input type="file" name="speakerImage" class="form-control" accept="image/*" />
-                            @if (!string.IsNullOrEmpty(Model.SpeakerImagePath))
+                            <label asp-for="SpeakerImage" class="form-label">Imagine speaker</label>
+                            <input asp-for="SpeakerImage" class="form-control" accept="image/*" />
+                            <span asp-validation-for="SpeakerImage" class="text-danger"></span>
+                            @if (!string.IsNullOrEmpty(Model.ExistingSpeakerImagePath))
                             {
                                 <div class="mt-2">
-                                    <img src="@Model.SpeakerImagePath" alt="Imagine speaker curenta" class="img-thumbnail" style="max-height: 150px;" />
+                                    <img src="@Model.ExistingSpeakerImagePath" alt="Imagine speaker curenta" class="img-thumbnail" style="max-height: 150px;" />
                                     <small class="d-block text-muted mt-1">Imagine curenta. Incarcati una noua pentru a o inlocui.</small>
                                 </div>
                             }

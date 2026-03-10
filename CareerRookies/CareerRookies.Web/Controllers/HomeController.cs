@@ -1,42 +1,36 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
-using CareerRookies.Web.Models;
+using CareerRookies.Web.Services.Interfaces;
 using CareerRookies.Web.ViewModels;
 
 namespace CareerRookies.Web.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IWorkshopService _workshopService;
+    private readonly ITestimonialService _testimonialService;
+    private readonly IArticleService _articleService;
+    private readonly IResourceService _resourceService;
 
-    public HomeController(ApplicationDbContext context)
+    public HomeController(
+        IWorkshopService workshopService,
+        ITestimonialService testimonialService,
+        IArticleService articleService,
+        IResourceService resourceService)
     {
-        _context = context;
+        _workshopService = workshopService;
+        _testimonialService = testimonialService;
+        _articleService = articleService;
+        _resourceService = resourceService;
     }
 
     public async Task<IActionResult> Index()
     {
         var model = new HomeViewModel
         {
-            UpcomingWorkshops = await _context.Workshops
-                .Where(w => w.Date > DateTime.UtcNow)
-                .OrderBy(w => w.Date)
-                .Take(3)
-                .ToListAsync(),
-            Testimonials = await _context.Testimonials
-                .OrderBy(t => t.SortOrder)
-                .Take(10)
-                .ToListAsync(),
-            RecentArticles = await _context.Articles
-                .Where(a => a.Status == ArticleStatus.Approved)
-                .OrderByDescending(a => a.CreatedAt)
-                .Take(3)
-                .ToListAsync(),
-            FeaturedResources = await _context.CareerResources
-                .OrderBy(r => r.SortOrder)
-                .Take(6)
-                .ToListAsync()
+            UpcomingWorkshops = await _workshopService.GetUpcomingTopAsync(3),
+            Testimonials = await _testimonialService.GetTopApprovedAsync(10),
+            RecentArticles = await _articleService.GetRecentApprovedAsync(3),
+            FeaturedResources = await _resourceService.GetTopAsync(6)
         };
         return View(model);
     }
@@ -45,5 +39,15 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View();
+    }
+
+    public async Task<IActionResult> Search(string? q, int page = 1)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return View(new PagedResult<Models.Article>());
+
+        var results = await _articleService.SearchAsync(q.Trim(), page);
+        ViewBag.Query = q;
+        return View(results);
     }
 }

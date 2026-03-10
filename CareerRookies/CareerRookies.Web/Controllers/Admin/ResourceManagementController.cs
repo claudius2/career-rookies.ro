@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
 using CareerRookies.Web.Models;
+using CareerRookies.Web.Services.Interfaces;
+using CareerRookies.Web.ViewModels.Admin;
 
 namespace CareerRookies.Web.Controllers.Admin;
 
@@ -10,58 +10,75 @@ namespace CareerRookies.Web.Controllers.Admin;
 [Route("Admin/Resources")]
 public class ResourceManagementController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IResourceService _resourceService;
+    private readonly IAuditService _auditService;
 
-    public ResourceManagementController(ApplicationDbContext context)
+    public ResourceManagementController(IResourceService resourceService, IAuditService auditService)
     {
-        _context = context;
+        _resourceService = resourceService;
+        _auditService = auditService;
     }
 
     [Route("")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var resources = await _context.CareerResources
-            .OrderBy(r => r.Category)
-            .ThenBy(r => r.SortOrder)
-            .ToListAsync();
+        var resources = await _resourceService.GetAllAsync(page);
         return View("~/Views/Admin/Resource/Index.cshtml", resources);
     }
 
     [Route("Create")]
     public IActionResult Create()
     {
-        return View("~/Views/Admin/Resource/Create.cshtml");
+        return View("~/Views/Admin/Resource/Create.cshtml", new ResourceFormViewModel());
     }
 
     [HttpPost]
     [Route("Create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Name,Url,Category,SortOrder")] CareerResource model)
+    public async Task<IActionResult> Create(ResourceFormViewModel model)
     {
         if (!ModelState.IsValid)
             return View("~/Views/Admin/Resource/Create.cshtml", model);
 
-        _context.CareerResources.Add(model);
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Resursa a fost creată.";
+        var resource = new CareerResource
+        {
+            Name = model.Name,
+            Url = model.Url,
+            Category = model.Category,
+            SortOrder = model.SortOrder
+        };
+
+        await _resourceService.CreateAsync(resource);
+        await _auditService.LogAsync("CareerResource", resource.Id, "Created", User.Identity?.Name);
+        TempData["Success"] = "Resursa a fost creata.";
         return RedirectToAction("Index");
     }
 
     [Route("Edit/{id}")]
     public async Task<IActionResult> Edit(int id)
     {
-        var resource = await _context.CareerResources.FindAsync(id);
+        var resource = await _resourceService.GetByIdAsync(id);
         if (resource == null) return NotFound();
-        return View("~/Views/Admin/Resource/Edit.cshtml", resource);
+
+        var model = new ResourceFormViewModel
+        {
+            Id = resource.Id,
+            Name = resource.Name,
+            Url = resource.Url,
+            Category = resource.Category,
+            SortOrder = resource.SortOrder
+        };
+
+        return View("~/Views/Admin/Resource/Edit.cshtml", model);
     }
 
     [HttpPost]
     [Route("Edit/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Url,Category,SortOrder")] CareerResource model)
+    public async Task<IActionResult> Edit(int id, ResourceFormViewModel model)
     {
         if (id != model.Id) return NotFound();
-        var resource = await _context.CareerResources.FindAsync(id);
+        var resource = await _resourceService.GetByIdAsync(id);
         if (resource == null) return NotFound();
 
         if (!ModelState.IsValid)
@@ -71,8 +88,9 @@ public class ResourceManagementController : Controller
         resource.Url = model.Url;
         resource.Category = model.Category;
         resource.SortOrder = model.SortOrder;
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Resursa a fost actualizată.";
+        await _resourceService.UpdateAsync(resource);
+        await _auditService.LogAsync("CareerResource", resource.Id, "Updated", User.Identity?.Name);
+        TempData["Success"] = "Resursa a fost actualizata.";
         return RedirectToAction("Index");
     }
 
@@ -81,11 +99,9 @@ public class ResourceManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var resource = await _context.CareerResources.FindAsync(id);
-        if (resource == null) return NotFound();
-        _context.CareerResources.Remove(resource);
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Resursa a fost ștearsă.";
+        await _resourceService.DeleteAsync(id);
+        await _auditService.LogAsync("CareerResource", id, "Deleted", User.Identity?.Name);
+        TempData["Success"] = "Resursa a fost stearsa.";
         return RedirectToAction("Index");
     }
 }

@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
-using CareerRookies.Web.Models;
+using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Controllers.Admin;
 
@@ -10,17 +8,17 @@ namespace CareerRookies.Web.Controllers.Admin;
 [Route("Admin/Settings")]
 public class SettingsController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ISettingsService _settingsService;
 
-    public SettingsController(ApplicationDbContext context)
+    public SettingsController(ISettingsService settingsService)
     {
-        _context = context;
+        _settingsService = settingsService;
     }
 
     [Route("")]
     public async Task<IActionResult> Index()
     {
-        var settings = await _context.SiteSettings.OrderBy(s => s.Key).ToListAsync();
+        var settings = await _settingsService.GetAllAsync();
         return View("~/Views/Admin/Settings/Index.cshtml", settings);
     }
 
@@ -35,19 +33,8 @@ public class SettingsController : Controller
             return RedirectToAction("Index");
         }
 
-        var allSettings = await _context.SiteSettings.ToListAsync();
-        var settingsDict = allSettings.ToDictionary(s => s.Key, s => s);
-
-        foreach (var kvp in settings)
-        {
-            if (settingsDict.TryGetValue(kvp.Key, out var setting))
-            {
-                setting.Value = kvp.Value;
-            }
-        }
-
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Setările au fost actualizate.";
+        await _settingsService.UpdateAsync(settings);
+        TempData["Success"] = "Setarile au fost actualizate.";
         return RedirectToAction("Index");
     }
 }

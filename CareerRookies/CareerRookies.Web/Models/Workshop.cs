@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using CareerRookies.Web.Models.Interfaces;
 
 namespace CareerRookies.Web.Models;
 
-public class Workshop
+public class Workshop : ITimestamped, ISoftDeletable
 {
     public int Id { get; set; }
 
@@ -10,6 +11,10 @@ public class Workshop
     [MaxLength(200)]
     [Display(Name = "Titlu")]
     public string Title { get; set; } = string.Empty;
+
+    [MaxLength(250)]
+    [Display(Name = "Slug")]
+    public string Slug { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Descrierea este obligatorie.")]
     [Display(Name = "Descriere")]
@@ -19,6 +24,10 @@ public class Workshop
     [Display(Name = "Data")]
     [DataType(DataType.DateTime)]
     public DateTime Date { get; set; }
+
+    [Display(Name = "Capacitate maxima")]
+    [Range(0, 10000, ErrorMessage = "Capacitatea trebuie sa fie intre 0 si 10000.")]
+    public int? MaxCapacity { get; set; }
 
     [Required(ErrorMessage = "Numele speaker-ului este obligatoriu.")]
     [MaxLength(100)]
@@ -41,7 +50,12 @@ public class Workshop
     [Display(Name = "Actualizat la")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public ICollection<WorkshopRegistration> Registrations { get; set; } = new List<WorkshopRegistration>();
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
+    public ICollection<WorkshopRegistration> Registrations { get; set; } = new List<WorkshopRegistration>();
     public ICollection<WorkshopMedia> Media { get; set; } = new List<WorkshopMedia>();
+
+    public int RegistrationCount => Registrations.Count;
+    public bool IsFull => MaxCapacity.HasValue && RegistrationCount >= MaxCapacity.Value;
 }

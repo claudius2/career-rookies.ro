@@ -1,4 +1,5 @@
-@model List<Testimonial>
+@using CareerRookies.Web.ViewModels
+@model PagedResult<Testimonial>
 @{
     ViewData["Title"] = "Gestionare Testimoniale";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -22,7 +23,7 @@
 
     <div class="card">
         <div class="card-body">
-            @if (Model.Any())
+            @if (Model.Items.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-striped table-hover align-middle">
@@ -31,17 +32,18 @@
                                 <th style="max-width: 350px;">Text</th>
                                 <th>Autor</th>
                                 <th>Tip</th>
+                                <th>Status</th>
                                 <th>Ordine</th>
                                 <th class="text-end">Actiuni</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var testimonial in Model)
+                            @foreach (var testimonial in Model.Items)
                             {
                                 <tr>
                                     <td style="max-width: 350px;">
                                         <span title="@testimonial.Text">
-                                            @(testimonial.Text.Length > 100 ? testimonial.Text.Substring(0, 100) + "..." : testimonial.Text)
+                                            @(testimonial.Text.Length > 100 ? testimonial.Text[..100] + "..." : testimonial.Text)
                                         </span>
                                     </td>
                                     <td>@testimonial.AuthorName</td>
@@ -56,8 +58,28 @@
                                                 break;
                                         }
                                     </td>
+                                    <td>
+                                        @if (testimonial.IsApproved)
+                                        {
+                                            <span class="badge bg-success">Aprobat</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">In asteptare</span>
+                                        }
+                                    </td>
                                     <td>@testimonial.SortOrder</td>
                                     <td class="text-end">
+                                        @if (!testimonial.IsApproved)
+                                        {
+                                            <form action="/Admin/Testimonials/Approve/@testimonial.Id"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Aproba">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                            </form>
+                                        }
                                         <a href="/Admin/Testimonials/Edit/@testimonial.Id"
                                            class="btn btn-sm btn-outline-primary" title="Editeaza">
                                             <i class="bi bi-pencil"></i> Editeaza
@@ -76,6 +98,7 @@
                         </tbody>
                     </table>
                 </div>
+                <partial name="_Pagination" model="@(Model.Page, Model.TotalPages, "Index", (string?)null, (object?)null)" />
             }
             else
             {

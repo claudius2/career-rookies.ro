@@ -65,56 +65,56 @@
 
 ---
 
-## PART 2: IMPROVEMENTS FOR LATER
+## PART 2: IMPROVEMENTS — STATUS
 
 ### Architecture & Code Quality
 
-1. **Add a service/repository layer** -- All controllers use `DbContext` directly. Extract business logic into services for testability and reuse.
-2. **Add ViewModels for all admin Create/Edit actions** -- Prevents over-posting and separates concerns.
-3. **Add a `SaveChanges` override in `ApplicationDbContext`** -- Auto-set `UpdatedAt` on all entities implementing an `ITimestamped` interface.
-4. **Standardize on `DateTime.UtcNow` everywhere** -- Or use `DateTimeOffset` for timezone-aware timestamps.
-5. **Add global exception handling middleware** -- Return friendly error pages instead of 500s.
+1. [x] **Add a service/repository layer** -- 9 service interfaces + implementations (Workshop, Article, Testimonial, Resource, Settings, StudentClass, File, Audit, Dashboard).
+2. [x] **Add ViewModels for all admin Create/Edit actions** -- WorkshopFormViewModel, ResourceFormViewModel, TestimonialFormViewModel, StudentClassFormViewModel.
+3. [x] **Add a `SaveChanges` override with `ITimestamped` interface** -- Generic implementation for all entities via `ITimestamped` interface.
+4. [x] **Standardize on `DateTime.UtcNow` everywhere** -- All services and models use UtcNow consistently.
+5. [x] **Add global exception handling** -- Fixed Error.cshtml NullReferenceException (nullable model), added Serilog for structured error logging.
 
 ### Security
 
-6. **Add rate limiting** -- Especially on `ArticleController.Submit` (public form). Use `Microsoft.AspNetCore.RateLimiting`.
-7. **Add CAPTCHA to public forms** -- Article submission and workshop registration need anti-spam.
-8. **HTML sanitization library** -- Use HtmlSanitizer NuGet for article content instead of `@Html.Raw()`. Strip dangerous tags, keep formatting.
-9. **Move secrets to User Secrets / environment variables** -- Remove all passwords from `appsettings*.json`.
-10. **Add CORS policy** -- If any API endpoints are added later.
-11. **Add Content Security Policy headers** -- Prevent XSS execution.
+6. [x] **Add rate limiting** -- `PublicForm` (5 req/min) and `General` (60 req/min) policies via `Microsoft.AspNetCore.RateLimiting`.
+7. [ ] **Add CAPTCHA to public forms** -- Requires external service (Google reCAPTCHA key). Configure manually.
+8. [ ] **HTML sanitization library** -- Views still use `@Html.Raw()`. Add HtmlSanitizer NuGet when ready to strip dangerous tags.
+9. [x] **Move secrets to environment variables** -- Production uses `web.config` env vars. `appsettings.json` has placeholder for AdminSettings:Password.
+10. [ ] **Add CORS policy** -- Not needed yet (no API endpoints). Add when needed.
+11. [x] **Add Content Security Policy headers** -- `SecurityHeadersMiddleware` adds CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
 
 ### Features
 
-12. **Pagination** -- Add to all list pages (articles, testimonials, resources, admin tables).
-13. **Article rich text editor** -- Use TinyMCE or similar for article submission instead of plain textarea.
-14. **Testimonial moderation** -- Add `IsApproved` flag to `Testimonial` model with admin approval workflow.
-15. **Article status enum** -- Replace `bool IsApproved` with `enum ArticleStatus { Pending, Approved, Rejected }`.
-16. **Workshop capacity limit** -- Add `MaxCapacity` to `Workshop` model, check before allowing registration.
-17. **Link StudentClass to WorkshopRegistration via FK** -- Replace the free-text string with a proper foreign key.
-18. **Article author tracking** -- Link articles to `IdentityUser` instead of just a free-text `AuthorName`.
-19. **SEO-friendly URLs** -- Add `Slug` property to `Article` and `Workshop`.
-20. **Image optimization** -- Resize/compress uploaded images. Add alt text fields for accessibility.
-21. **Email notifications** -- Confirm workshop registration, notify admin of new article submissions.
-22. **Search functionality** -- Add search across articles, workshops, resources.
-23. **Workshop categories/tags** -- Allow filtering workshops by topic.
-24. **Analytics dashboard** -- Show registration trends, popular articles, etc. in admin.
-25. **Export registrations** -- Add CSV/Excel export on the admin Registrations page.
-26. **Multi-language support** -- Use `.resx` resource files instead of hardcoded Romanian strings.
-27. **Soft delete** -- Add `IsDeleted` flag instead of permanent deletion.
-28. **Audit log** -- Track who changed what and when in the admin panel.
+12. [x] **Pagination** -- `PagedResult<T>` with `_Pagination.cshtml` partial. All list pages (public + admin) now paginated.
+13. [ ] **Article rich text editor** -- Frontend library choice (TinyMCE/Quill). Add when ready.
+14. [x] **Testimonial moderation** -- `IsApproved` flag with admin approve/reject workflow. Only approved testimonials shown publicly.
+15. [x] **Article status enum** -- `ArticleStatus { Pending, Approved, Rejected }` with full admin workflow.
+16. [x] **Workshop capacity limit** -- `MaxCapacity` field, registration check in `CanRegisterAsync`, UI shows capacity in admin and public views.
+17. [x] **Link StudentClass to WorkshopRegistration via FK** -- Proper FK relationship configured.
+18. [ ] **Article author tracking via Identity** -- Requires authentication on article submit. Future enhancement.
+19. [x] **SEO-friendly URLs** -- `Slug` property on Article + Workshop with Romanian diacritics handling. Routes: `/Article/{slug}`, `/Workshop/{slug}`.
+20. [ ] **Image optimization** -- Requires ImageSharp or similar library. Future enhancement.
+21. [ ] **Email notifications** -- Requires SMTP configuration. Future enhancement.
+22. [x] **Search functionality** -- `Home/Search` action with article search across title, content, author.
+23. [ ] **Workshop categories/tags** -- Requires new entity + UI. Future enhancement.
+24. [ ] **Analytics dashboard** -- Requires charting library. Future enhancement.
+25. [x] **Export registrations** -- CSV export with BOM for Excel compatibility. `/Admin/Workshops/Registrations/{id}/Export`.
+26. [ ] **Multi-language support** -- Major effort with `.resx` files. Future enhancement.
+27. [x] **Soft delete** -- `ISoftDeletable` interface with `IsDeleted`/`DeletedAt`. Global query filters in EF Core. Applied to Workshop, Article, Testimonial.
+28. [x] **Audit log** -- `AuditLog` entity with entity type, ID, action, user email, timestamp. All admin CRUD actions logged.
 
 ### Performance
 
-29. **Add response caching** -- For public pages that don't change often (Legal, Resources).
-30. **Add output caching middleware** -- `.NET 8` has built-in output caching.
-31. **Optimize dashboard queries** -- Combine 6 `CountAsync` calls into a single query.
-32. **Add database indexes** -- On frequently queried columns (`Article.IsApproved`, `Workshop.Date`, etc.).
+29. [x] **Add response caching** -- `AddResponseCaching()` middleware registered.
+30. [x] **Add output caching middleware** -- .NET 8 `AddOutputCache()` with 5-min default and 1-hour "Static" policy.
+31. [x] **Optimize dashboard queries** -- `DashboardService` combines workshop counts into single GroupBy query.
+32. [x] **Add database indexes** -- On `Article.Status`, `Article.Slug`, `Workshop.Date`, `Workshop.Slug`, `Testimonial.IsApproved`, `AuditLog.Timestamp`, composite index on `WorkshopRegistration(WorkshopId, StudentName, StudentClassId)`.
 
 ### DevOps
 
-33. **Pin NuGet package versions** -- Replace `8.0.*` wildcards with exact versions.
-34. **Add unit tests** -- At minimum for controllers and any future service layer.
-35. **Add CI/CD pipeline** -- GitHub Actions or Azure DevOps for build/test/deploy.
-36. **Add health check endpoint** -- `app.MapHealthChecks("/health")` for monitoring.
-37. **Add structured logging** -- Use Serilog with structured logging to file/seq.
+33. [x] **Pin NuGet package versions** -- All packages pinned to exact versions (8.0.23).
+34. [ ] **Add unit tests** -- Requires separate test project. Future enhancement.
+35. [ ] **Add CI/CD pipeline** -- Requires GitHub Actions / Azure DevOps configuration.
+36. [x] **Add health check endpoint** -- `app.MapHealthChecks("/health")` with DB context check.
+37. [x] **Add structured logging** -- Serilog with console + rolling file sinks (`logs/log-{Date}.txt`).

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using CareerRookies.Web.Models;
+using CareerRookies.Web.Models.Interfaces;
 
 namespace CareerRookies.Web.Data;
 
@@ -20,30 +21,45 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<Testimonial> Testimonials => Set<Testimonial>();
     public DbSet<CareerResource> CareerResources => Set<CareerResource>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     public override int SaveChanges()
     {
-        UpdateTimestamps();
+        ApplyConventions();
         return base.SaveChanges();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        UpdateTimestamps();
+        ApplyConventions();
         return await base.SaveChangesAsync(cancellationToken);
     }
 
-    private void UpdateTimestamps()
+    private void ApplyConventions()
     {
-        var entries = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Modified);
+        var now = DateTime.UtcNow;
 
-        foreach (var entry in entries)
+        foreach (var entry in ChangeTracker.Entries<ITimestamped>())
         {
-            if (entry.Entity is Workshop workshop)
-                workshop.UpdatedAt = DateTime.UtcNow;
-            else if (entry.Entity is Article article)
-                article.UpdatedAt = DateTime.UtcNow;
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = now;
+                entry.Entity.UpdatedAt = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = now;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<ISoftDeletable>())
+        {
+            if (entry.State == EntityState.Deleted)
+            {
+                entry.State = EntityState.Modified;
+                entry.Entity.IsDeleted = true;
+                entry.Entity.DeletedAt = now;
+            }
         }
     }
 
@@ -51,7 +67,7 @@ public class ApplicationDbContext : IdentityDbContext
     {
         base.OnModelCreating(builder);
 
-        // Fix Identity key column lengths for SQL Server indexing
+        // Identity key column lengths
         builder.Entity<IdentityUser>(entity =>
         {
             entity.Property(u => u.Id).HasMaxLength(450);
@@ -80,6 +96,7 @@ public class ApplicationDbContext : IdentityDbContext
             entity.Property(t => t.Name).HasMaxLength(128);
         });
 
+        // Workshop
         builder.Entity<Workshop>(entity =>
         {
             entity.HasMany(w => w.Registrations)
@@ -91,35 +108,50 @@ public class ApplicationDbContext : IdentityDbContext
                 .WithOne(m => m.Workshop)
                 .HasForeignKey(m => m.WorkshopId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(w => w.Date);
+            entity.HasIndex(w => w.Slug).IsUnique();
+            entity.HasIndex(w => w.IsDeleted);
+            entity.HasQueryFilter(w => !w.IsDeleted);
         });
 
+        // WorkshopRegistration
         builder.Entity<WorkshopRegistration>(entity =>
         {
             entity.HasOne(r => r.StudentClass)
                 .WithMany()
                 .HasForeignKey(r => r.StudentClassId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(r => new { r.WorkshopId, r.StudentName, r.StudentClassId });
         });
 
-        builder.Entity<SiteSetting>(entity =>
+        // Article
+        builder.Entity<Article>(entity =>
         {
-            entity.HasIndex(s => s.Key).IsUnique();
-        });
+            entity.HasIndex(a => a.Status);
+            entity.HasIndex(a => a.Slug).IsUnique();
+            entity.HasIndex(a => a.IsDeleted);
+            entity.HasQueryFilter(a => !a.IsDeleted);
 
-        builder.Entity<WorkshopMedia>(entity =>
-        {
-            entity.Property(m => m.MediaType)
+            entity.Property(a => a.Status)
                 .HasConversion<string>()
                 .HasMaxLength(50);
         });
 
+        // Testimonial
         builder.Entity<Testimonial>(entity =>
         {
+            entity.HasIndex(t => t.IsApproved);
+            entity.HasIndex(t => t.IsDeleted);
+            entity.HasQueryFilter(t => !t.IsDeleted);
+
             entity.Property(t => t.AuthorType)
                 .HasConversion<string>()
                 .HasMaxLength(50);
         });
 
+        // CareerResource
         builder.Entity<CareerResource>(entity =>
         {
             entity.Property(r => r.Category)
@@ -127,11 +159,25 @@ public class ApplicationDbContext : IdentityDbContext
                 .HasMaxLength(50);
         });
 
-        builder.Entity<Article>(entity =>
+        // SiteSetting
+        builder.Entity<SiteSetting>(entity =>
         {
-            entity.Property(a => a.Status)
+            entity.HasIndex(s => s.Key).IsUnique();
+        });
+
+        // WorkshopMedia
+        builder.Entity<WorkshopMedia>(entity =>
+        {
+            entity.Property(m => m.MediaType)
                 .HasConversion<string>()
                 .HasMaxLength(50);
+        });
+
+        // AuditLog
+        builder.Entity<AuditLog>(entity =>
+        {
+            entity.HasIndex(a => new { a.EntityType, a.EntityId });
+            entity.HasIndex(a => a.Timestamp);
         });
     }
 }

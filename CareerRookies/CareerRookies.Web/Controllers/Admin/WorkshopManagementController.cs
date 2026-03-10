@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
 using CareerRookies.Web.Models;
+using CareerRookies.Web.Services.Interfaces;
+using CareerRookies.Web.ViewModels.Admin;
 
 namespace CareerRookies.Web.Controllers.Admin;
 
@@ -10,67 +10,81 @@ namespace CareerRookies.Web.Controllers.Admin;
 [Route("Admin/Workshops")]
 public class WorkshopManagementController : Controller
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IWebHostEnvironment _env;
-
-    private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
-        { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+    private readonly IWorkshopService _workshopService;
+    private readonly IFileService _fileService;
+    private readonly IAuditService _auditService;
 
     private static readonly HashSet<string> AllowedVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
         { ".mp4", ".webm", ".mov" };
 
-    private const long MaxFileSize = 20 * 1024 * 1024; // 20 MB
+    private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
-    public WorkshopManagementController(ApplicationDbContext context, IWebHostEnvironment env)
+    public WorkshopManagementController(
+        IWorkshopService workshopService,
+        IFileService fileService,
+        IAuditService auditService)
     {
-        _context = context;
-        _env = env;
+        _workshopService = workshopService;
+        _fileService = fileService;
+        _auditService = auditService;
     }
 
     [Route("")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var workshops = await _context.Workshops
-            .OrderByDescending(w => w.Date)
-            .ToListAsync();
+        var workshops = await _workshopService.GetAllAsync(page);
         return View("~/Views/Admin/Workshop/Index.cshtml", workshops);
     }
 
     [Route("Create")]
     public IActionResult Create()
     {
-        return View("~/Views/Admin/Workshop/Create.cshtml");
+        return View("~/Views/Admin/Workshop/Create.cshtml", new WorkshopFormViewModel());
     }
 
     [HttpPost]
     [Route("Create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(
-        [Bind("Title,Description,Date,SpeakerName,SpeakerDescription")] Workshop model,
-        IFormFile? image, IFormFile? speakerImage)
+    public async Task<IActionResult> Create(WorkshopFormViewModel model)
     {
         if (!ModelState.IsValid)
             return View("~/Views/Admin/Workshop/Create.cshtml", model);
 
-        if (image != null)
+        var workshop = new Workshop
         {
-            var path = await SaveImageAsync(image, "workshops");
-            if (path == null) return View("~/Views/Admin/Workshop/Create.cshtml", model);
-            model.ImagePath = path;
+            Title = model.Title,
+            Description = model.Description,
+            Date = model.Date,
+            MaxCapacity = model.MaxCapacity,
+            SpeakerName = model.SpeakerName,
+            SpeakerDescription = model.SpeakerDescription
+        };
+
+        if (model.Image != null)
+        {
+            var path = await _fileService.SaveImageAsync(model.Image, "workshops");
+            if (path == null)
+            {
+                ModelState.AddModelError("Image", "Fisierul nu a putut fi salvat. Verificati tipul si dimensiunea.");
+                return View("~/Views/Admin/Workshop/Create.cshtml", model);
+            }
+            workshop.ImagePath = path;
         }
 
-        if (speakerImage != null)
+        if (model.SpeakerImage != null)
         {
-            var path = await SaveImageAsync(speakerImage, "speakers");
-            if (path == null) return View("~/Views/Admin/Workshop/Create.cshtml", model);
-            model.SpeakerImagePath = path;
+            var path = await _fileService.SaveImageAsync(model.SpeakerImage, "speakers");
+            if (path == null)
+            {
+                ModelState.AddModelError("SpeakerImage", "Fisierul nu a putut fi salvat. Verificati tipul si dimensiunea.");
+                return View("~/Views/Admin/Workshop/Create.cshtml", model);
+            }
+            workshop.SpeakerImagePath = path;
         }
 
-        model.CreatedAt = DateTime.UtcNow;
-        model.UpdatedAt = DateTime.UtcNow;
-
-        _context.Workshops.Add(model);
-        await _context.SaveChangesAsync();
+        await _workshopService.CreateAsync(workshop);
+        await _auditService.LogAsync("Workshop", workshop.Id, "Created", User.Identity?.Name);
 
         TempData["Success"] = "Workshop-ul a fost creat cu succes.";
         return RedirectToAction("Index");
@@ -79,49 +93,80 @@ public class WorkshopManagementController : Controller
     [Route("Edit/{id}")]
     public async Task<IActionResult> Edit(int id)
     {
-        var workshop = await _context.Workshops.FindAsync(id);
+        var workshop = await _workshopService.GetByIdAsync(id);
         if (workshop == null) return NotFound();
-        return View("~/Views/Admin/Workshop/Edit.cshtml", workshop);
+
+        var model = new WorkshopFormViewModel
+        {
+            Id = workshop.Id,
+            Title = workshop.Title,
+            Description = workshop.Description,
+            Date = workshop.Date,
+            MaxCapacity = workshop.MaxCapacity,
+            SpeakerName = workshop.SpeakerName,
+            SpeakerDescription = workshop.SpeakerDescription,
+            ExistingImagePath = workshop.ImagePath,
+            ExistingSpeakerImagePath = workshop.SpeakerImagePath
+        };
+
+        return View("~/Views/Admin/Workshop/Edit.cshtml", model);
     }
 
     [HttpPost]
     [Route("Edit/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id,
-        [Bind("Id,Title,Description,Date,SpeakerName,SpeakerDescription")] Workshop model,
-        IFormFile? image, IFormFile? speakerImage)
+    public async Task<IActionResult> Edit(int id, WorkshopFormViewModel model)
     {
         if (id != model.Id) return NotFound();
 
-        var workshop = await _context.Workshops.FindAsync(id);
+        var workshop = await _workshopService.GetByIdAsync(id);
         if (workshop == null) return NotFound();
 
         if (!ModelState.IsValid)
+        {
+            model.ExistingImagePath = workshop.ImagePath;
+            model.ExistingSpeakerImagePath = workshop.SpeakerImagePath;
             return View("~/Views/Admin/Workshop/Edit.cshtml", model);
+        }
 
         workshop.Title = model.Title;
         workshop.Description = model.Description;
         workshop.Date = model.Date;
+        workshop.MaxCapacity = model.MaxCapacity;
         workshop.SpeakerName = model.SpeakerName;
         workshop.SpeakerDescription = model.SpeakerDescription;
 
-        if (image != null)
+        if (model.Image != null)
         {
-            var path = await SaveImageAsync(image, "workshops");
-            if (path == null) return View("~/Views/Admin/Workshop/Edit.cshtml", model);
-            DeletePhysicalFile(workshop.ImagePath);
+            var path = await _fileService.SaveImageAsync(model.Image, "workshops");
+            if (path == null)
+            {
+                ModelState.AddModelError("Image", "Fisierul nu a putut fi salvat.");
+                model.ExistingImagePath = workshop.ImagePath;
+                model.ExistingSpeakerImagePath = workshop.SpeakerImagePath;
+                return View("~/Views/Admin/Workshop/Edit.cshtml", model);
+            }
+            _fileService.DeleteFile(workshop.ImagePath);
             workshop.ImagePath = path;
         }
 
-        if (speakerImage != null)
+        if (model.SpeakerImage != null)
         {
-            var path = await SaveImageAsync(speakerImage, "speakers");
-            if (path == null) return View("~/Views/Admin/Workshop/Edit.cshtml", model);
-            DeletePhysicalFile(workshop.SpeakerImagePath);
+            var path = await _fileService.SaveImageAsync(model.SpeakerImage, "speakers");
+            if (path == null)
+            {
+                ModelState.AddModelError("SpeakerImage", "Fisierul nu a putut fi salvat.");
+                model.ExistingImagePath = workshop.ImagePath;
+                model.ExistingSpeakerImagePath = workshop.SpeakerImagePath;
+                return View("~/Views/Admin/Workshop/Edit.cshtml", model);
+            }
+            _fileService.DeleteFile(workshop.SpeakerImagePath);
             workshop.SpeakerImagePath = path;
         }
 
-        await _context.SaveChangesAsync();
+        await _workshopService.UpdateAsync(workshop);
+        await _auditService.LogAsync("Workshop", workshop.Id, "Updated", User.Identity?.Name);
+
         TempData["Success"] = "Workshop-ul a fost actualizat.";
         return RedirectToAction("Index");
     }
@@ -131,43 +176,31 @@ public class WorkshopManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var workshop = await _context.Workshops
-            .Include(w => w.Media)
-            .FirstOrDefaultAsync(w => w.Id == id);
-        if (workshop == null) return NotFound();
-
-        // Clean up physical files
-        DeletePhysicalFile(workshop.ImagePath);
-        DeletePhysicalFile(workshop.SpeakerImagePath);
-        foreach (var media in workshop.Media)
-        {
-            if (media.MediaType != MediaType.YouTubeLink)
-                DeletePhysicalFile(media.FilePath);
-        }
-
-        _context.Workshops.Remove(workshop);
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Workshop-ul a fost șters.";
+        await _workshopService.SoftDeleteAsync(id);
+        await _auditService.LogAsync("Workshop", id, "Deleted", User.Identity?.Name);
+        TempData["Success"] = "Workshop-ul a fost sters.";
         return RedirectToAction("Index");
     }
 
     [Route("Registrations/{workshopId}")]
     public async Task<IActionResult> Registrations(int workshopId)
     {
-        var workshop = await _context.Workshops
-            .Include(w => w.Registrations)
-                .ThenInclude(r => r.StudentClass)
-            .FirstOrDefaultAsync(w => w.Id == workshopId);
+        var workshop = await _workshopService.GetWithRegistrationsAsync(workshopId);
         if (workshop == null) return NotFound();
         return View("~/Views/Admin/Workshop/Registrations.cshtml", workshop);
+    }
+
+    [Route("Registrations/{workshopId}/Export")]
+    public async Task<IActionResult> ExportRegistrations(int workshopId)
+    {
+        var csvBytes = await _workshopService.ExportRegistrationsCsvAsync(workshopId);
+        return File(csvBytes, "text/csv", $"registrations-workshop-{workshopId}.csv");
     }
 
     [Route("Media/{workshopId}")]
     public async Task<IActionResult> Media(int workshopId)
     {
-        var workshop = await _context.Workshops
-            .Include(w => w.Media.OrderBy(m => m.SortOrder))
-            .FirstOrDefaultAsync(w => w.Id == workshopId);
+        var workshop = await _workshopService.GetWithMediaAsync(workshopId);
         if (workshop == null) return NotFound();
         return View("~/Views/Admin/Workshop/Media.cshtml", workshop);
     }
@@ -177,21 +210,21 @@ public class WorkshopManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadMedia(int workshopId, IFormFile? file, MediaType mediaType, string? youtubeUrl)
     {
-        var workshop = await _context.Workshops.FindAsync(workshopId);
+        var workshop = await _workshopService.GetByIdAsync(workshopId);
         if (workshop == null) return NotFound();
 
         var media = new WorkshopMedia
         {
             WorkshopId = workshopId,
             MediaType = mediaType,
-            SortOrder = await _context.WorkshopMedia.CountAsync(m => m.WorkshopId == workshopId) + 1
+            SortOrder = await _workshopService.GetNextMediaSortOrderAsync(workshopId)
         };
 
         if (mediaType == MediaType.YouTubeLink)
         {
-            if (string.IsNullOrWhiteSpace(youtubeUrl) || !IsValidYouTubeUrl(youtubeUrl))
+            if (string.IsNullOrWhiteSpace(youtubeUrl) || !_fileService.IsValidYouTubeUrl(youtubeUrl))
             {
-                TempData["Error"] = "Introduceți un URL YouTube valid.";
+                TempData["Error"] = "Introduceti un URL YouTube valid.";
                 return RedirectToAction("Media", new { workshopId });
             }
             media.FilePath = youtubeUrl;
@@ -199,22 +232,23 @@ public class WorkshopManagementController : Controller
         else if (file != null)
         {
             var allowedExtensions = mediaType == MediaType.Video ? AllowedVideoExtensions : AllowedImageExtensions;
-            var path = await SaveFileAsync(file, "workshop-media", allowedExtensions);
+            var path = await _fileService.SaveFileAsync(file, "workshop-media", allowedExtensions);
             if (path == null)
             {
+                TempData["Error"] = "Fisierul nu a putut fi salvat. Verificati tipul si dimensiunea.";
                 return RedirectToAction("Media", new { workshopId });
             }
             media.FilePath = path;
         }
         else
         {
-            TempData["Error"] = "Selectați un fișier.";
+            TempData["Error"] = "Selectati un fisier.";
             return RedirectToAction("Media", new { workshopId });
         }
 
-        _context.WorkshopMedia.Add(media);
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Media a fost adăugată.";
+        await _workshopService.AddMediaAsync(media);
+        await _auditService.LogAsync("WorkshopMedia", media.Id, "Created", User.Identity?.Name);
+        TempData["Success"] = "Media a fost adaugata.";
         return RedirectToAction("Media", new { workshopId });
     }
 
@@ -223,66 +257,16 @@ public class WorkshopManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteMedia(int id)
     {
-        var media = await _context.WorkshopMedia.FindAsync(id);
+        var media = await _workshopService.GetMediaByIdAsync(id);
         if (media == null) return NotFound();
         var workshopId = media.WorkshopId;
 
-        // Clean up physical file
         if (media.MediaType != MediaType.YouTubeLink)
-            DeletePhysicalFile(media.FilePath);
+            _fileService.DeleteFile(media.FilePath);
 
-        _context.WorkshopMedia.Remove(media);
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Media a fost ștearsă.";
+        await _workshopService.DeleteMediaAsync(id);
+        await _auditService.LogAsync("WorkshopMedia", id, "Deleted", User.Identity?.Name);
+        TempData["Success"] = "Media a fost stearsa.";
         return RedirectToAction("Media", new { workshopId });
-    }
-
-    private async Task<string?> SaveImageAsync(IFormFile file, string subfolder)
-    {
-        return await SaveFileAsync(file, subfolder, AllowedImageExtensions);
-    }
-
-    private async Task<string?> SaveFileAsync(IFormFile file, string subfolder, HashSet<string> allowedExtensions)
-    {
-        if (file.Length > MaxFileSize)
-        {
-            TempData["Error"] = $"Fișierul este prea mare. Dimensiunea maximă este {MaxFileSize / (1024 * 1024)} MB.";
-            return null;
-        }
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(extension))
-        {
-            TempData["Error"] = $"Tipul de fișier '{extension}' nu este permis. Extensii permise: {string.Join(", ", allowedExtensions)}";
-            return null;
-        }
-
-        var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", subfolder);
-        Directory.CreateDirectory(uploadsDir);
-        var fileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(uploadsDir, fileName);
-        using var stream = new FileStream(filePath, FileMode.Create);
-        await file.CopyToAsync(stream);
-        return $"/uploads/{subfolder}/{fileName}";
-    }
-
-    private void DeletePhysicalFile(string? relativePath)
-    {
-        if (string.IsNullOrEmpty(relativePath)) return;
-
-        var fullPath = Path.Combine(_env.WebRootPath, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-        if (System.IO.File.Exists(fullPath))
-        {
-            System.IO.File.Delete(fullPath);
-        }
-    }
-
-    private static bool IsValidYouTubeUrl(string url)
-    {
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-            return false;
-
-        var host = uri.Host.ToLowerInvariant();
-        return host.Contains("youtube.com") || host.Contains("youtu.be");
     }
 }

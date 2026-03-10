@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
-using CareerRookies.Web.Models;
-using CareerRookies.Web.ViewModels;
+using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Controllers.Admin;
 
@@ -11,26 +8,18 @@ namespace CareerRookies.Web.Controllers.Admin;
 [Route("Admin")]
 public class DashboardController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDashboardService _dashboardService;
 
-    public DashboardController(ApplicationDbContext context)
+    public DashboardController(IDashboardService dashboardService)
     {
-        _context = context;
+        _dashboardService = dashboardService;
     }
 
     [Route("")]
     [Route("Dashboard")]
     public async Task<IActionResult> Index()
     {
-        var model = new DashboardViewModel
-        {
-            WorkshopCount = await _context.Workshops.CountAsync(),
-            UpcomingWorkshopCount = await _context.Workshops.CountAsync(w => w.Date > DateTime.UtcNow),
-            PendingArticles = await _context.Articles.CountAsync(a => a.Status == ArticleStatus.Pending),
-            TotalRegistrations = await _context.WorkshopRegistrations.CountAsync(),
-            TestimonialCount = await _context.Testimonials.CountAsync(),
-            ResourceCount = await _context.CareerResources.CountAsync()
-        };
+        var model = await _dashboardService.GetDashboardAsync();
         return View("~/Views/Admin/Dashboard/Index.cshtml", model);
     }
 }

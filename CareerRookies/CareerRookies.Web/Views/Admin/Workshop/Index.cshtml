@@ -1,4 +1,5 @@
-@model List<Workshop>
+@using CareerRookies.Web.ViewModels
+@model PagedResult<Workshop>
 @{
     ViewData["Title"] = "Gestionare Workshop-uri";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -22,7 +23,7 @@
 
     <div class="card">
         <div class="card-body">
-            @if (Model.Any())
+            @if (Model.Items.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-striped table-hover align-middle">
@@ -31,16 +32,27 @@
                                 <th>Titlu</th>
                                 <th>Data</th>
                                 <th>Speaker</th>
+                                <th>Capacitate</th>
                                 <th class="text-end">Actiuni</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var workshop in Model)
+                            @foreach (var workshop in Model.Items)
                             {
                                 <tr>
                                     <td>@workshop.Title</td>
                                     <td>@workshop.Date.ToString("dd.MM.yyyy HH:mm")</td>
                                     <td>@workshop.SpeakerName</td>
+                                    <td>
+                                        @if (workshop.MaxCapacity.HasValue)
+                                        {
+                                            <span>@workshop.MaxCapacity</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Nelimitat</span>
+                                        }
+                                    </td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="/Admin/Workshops/Edit/@workshop.Id"
@@ -70,6 +82,7 @@
                         </tbody>
                     </table>
                 </div>
+                <partial name="_Pagination" model="@(Model.Page, Model.TotalPages, "Index", (string?)null, (object?)null)" />
             }
             else
             {

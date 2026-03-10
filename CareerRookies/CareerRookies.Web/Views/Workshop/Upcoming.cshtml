@@ -1,4 +1,5 @@
-@model List<Workshop>
+@using CareerRookies.Web.ViewModels
+@model PagedResult<Workshop>
 @{
     ViewData["Title"] = "Workshop-uri Viitoare";
 }
@@ -7,13 +8,13 @@
     <div class="container">
         <div class="section-title">
             <h2>Workshop-uri Viitoare</h2>
-            <p>Înscrie-te la următoarele noastre evenimente</p>
+            <p>Inscrie-te la urmatoarele noastre evenimente</p>
         </div>
 
-        @if (Model.Any())
+        @if (Model.Items.Any())
         {
             <div class="row g-4">
-                @foreach (var workshop in Model)
+                @foreach (var workshop in Model.Items)
                 {
                     <div class="col-md-4">
                         <div class="card card-cr workshop-card h-100">
@@ -34,9 +35,13 @@
                                 <h5 class="card-title">@workshop.Title</h5>
                                 <div class="workshop-meta">
                                     <span><i class="bi bi-person-fill me-1"></i>@workshop.SpeakerName</span>
+                                    @if (workshop.MaxCapacity.HasValue)
+                                    {
+                                        <span class="ms-2"><i class="bi bi-people me-1"></i>Max: @workshop.MaxCapacity</span>
+                                    }
                                 </div>
                                 <p class="card-text">
-                                    @(workshop.Description.Length > 150 ? workshop.Description.Substring(0, 150) + "..." : workshop.Description)
+                                    @(workshop.Description.Length > 150 ? workshop.Description[..150] + "..." : workshop.Description)
                                 </p>
                                 <div class="mt-auto pt-2">
                                     <a asp-controller="Workshop" asp-action="Detail" asp-route-id="@workshop.Id" class="btn btn-primary-cr">
@@ -48,12 +53,13 @@
                     </div>
                 }
             </div>
+            <partial name="_Pagination" model="@(Model.Page, Model.TotalPages, "Upcoming", "Workshop", (object?)null)" />
         }
         else
         {
             <div class="text-center py-5">
                 <i class="bi bi-calendar-x" style="font-size: 4rem; color: var(--cr-primary); opacity: 0.3;"></i>
-                <p class="mt-3 fs-5">Nu există workshop-uri viitoare.</p>
+                <p class="mt-3 fs-5">Nu exista workshop-uri viitoare.</p>
                 <a asp-controller="Workshop" asp-action="Past" class="btn btn-outline-cr mt-2">
                     <i class="bi bi-arrow-left me-1"></i>Vezi workshop-uri trecute
                 </a>

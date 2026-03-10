@@ -1,23 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
+using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Controllers;
 
 public class TestimonialController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ITestimonialService _testimonialService;
 
-    public TestimonialController(ApplicationDbContext context)
+    public TestimonialController(ITestimonialService testimonialService)
     {
-        _context = context;
+        _testimonialService = testimonialService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var testimonials = await _context.Testimonials
-            .OrderBy(t => t.SortOrder)
-            .ToListAsync();
+        var testimonials = await _testimonialService.GetApprovedAsync();
         return View(testimonials);
     }
 }

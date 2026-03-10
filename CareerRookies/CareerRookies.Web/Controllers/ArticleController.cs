@@ -1,35 +1,37 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
-using CareerRookies.Web.Models;
+using CareerRookies.Web.Services.Interfaces;
 using CareerRookies.Web.ViewModels;
 
 namespace CareerRookies.Web.Controllers;
 
 public class ArticleController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IArticleService _articleService;
 
-    public ArticleController(ApplicationDbContext context)
+    public ArticleController(IArticleService articleService)
     {
-        _context = context;
+        _articleService = articleService;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var articles = await _context.Articles
-            .Where(a => a.Status == ArticleStatus.Approved)
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync();
+        var articles = await _articleService.GetApprovedAsync(page);
         return View(articles);
     }
 
     public async Task<IActionResult> Detail(int id)
     {
-        var article = await _context.Articles
-            .FirstOrDefaultAsync(a => a.Id == id && a.Status == ArticleStatus.Approved);
+        var article = await _articleService.GetApprovedByIdAsync(id);
         if (article == null) return NotFound();
         return View(article);
+    }
+
+    [Route("Article/{slug}")]
+    public async Task<IActionResult> DetailBySlug(string slug)
+    {
+        var article = await _articleService.GetBySlugAsync(slug);
+        if (article == null) return NotFound();
+        return View("Detail", article);
     }
 
     public IActionResult Submit()
@@ -43,20 +45,9 @@ public class ArticleController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var article = new Article
-        {
-            Title = model.Title,
-            Content = model.Content,
-            AuthorName = model.AuthorName,
-            Status = ArticleStatus.Pending,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        await _articleService.SubmitAsync(model.Title, model.Content, model.AuthorName);
 
-        _context.Articles.Add(article);
-        await _context.SaveChangesAsync();
-
-        TempData["Success"] = "Articolul a fost trimis și va fi revizuit de echipa noastră.";
+        TempData["Success"] = "Articolul a fost trimis si va fi revizuit de echipa noastra.";
         return RedirectToAction("Index");
     }
 }

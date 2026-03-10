@@ -1,4 +1,5 @@
-@model List<Article>
+@using CareerRookies.Web.ViewModels
+@model PagedResult<Article>
 @{
     ViewData["Title"] = "Articole";
 }
@@ -7,7 +8,7 @@
     <div class="container">
         <div class="section-title">
             <h2>Articole</h2>
-            <p>Descoperă povești, sfaturi și experiențe împărtășite de comunitatea Career Rookies.</p>
+            <p>Descopera povesti, sfaturi si experiente impartasite de comunitatea Career Rookies.</p>
         </div>
 
         <div class="text-center mb-5">
@@ -16,10 +17,10 @@
             </a>
         </div>
 
-        @if (Model.Any())
+        @if (Model.Items.Any())
         {
             <div class="row g-4">
-                @foreach (var article in Model)
+                @foreach (var article in Model.Items)
                 {
                     <div class="col-md-6 col-lg-4">
                         <div class="card card-cr article-card h-100">
@@ -35,12 +36,12 @@
                                 <p class="card-text">
                                     @{
                                         var plainText = System.Text.RegularExpressions.Regex.Replace(article.Content, "<.*?>", "");
-                                        @(plainText.Length > 200 ? plainText.Substring(0, 200) + "..." : plainText)
+                                        @(plainText.Length > 200 ? plainText[..200] + "..." : plainText)
                                     }
                                 </p>
                                 <div class="mt-auto">
                                     <a asp-controller="Article" asp-action="Detail" asp-route-id="@article.Id" class="btn btn-outline-cr">
-                                        <i class="bi bi-book me-1"></i>Citește
+                                        <i class="bi bi-book me-1"></i>Citeste
                                     </a>
                                 </div>
                             </div>
@@ -48,12 +49,13 @@
                     </div>
                 }
             </div>
+            <partial name="_Pagination" model="@(Model.Page, Model.TotalPages, "Index", "Article", (object?)null)" />
         }
         else
         {
             <div class="text-center py-5">
                 <i class="bi bi-journal-x" style="font-size: 4rem; color: var(--cr-primary); opacity: 0.4;"></i>
-                <p class="mt-3 fs-5" style="color: #666;">Nu există articole momentan.</p>
+                <p class="mt-3 fs-5" style="color: #666;">Nu exista articole momentan.</p>
                 <a asp-controller="Article" asp-action="Submit" class="btn btn-primary-cr mt-2">Fii primul care scrie un articol</a>
             </div>
         }

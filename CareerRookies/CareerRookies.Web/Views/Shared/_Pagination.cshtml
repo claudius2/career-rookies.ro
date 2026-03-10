@@ -1,0 +1,40 @@
+@model (int Page, int TotalPages, string Action, string? Controller, object? RouteValues)
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Paginare" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action(Model.Action, Model.Controller, GetRoute(Model.Page - 1, Model.RouteValues))">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            @for (var i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" href="@Url.Action(Model.Action, Model.Controller, GetRoute(i, Model.RouteValues))">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action(Model.Action, Model.Controller, GetRoute(Model.Page + 1, Model.RouteValues))">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@functions {
+    private object GetRoute(int page, object? extraRouteValues)
+    {
+        var dict = new Dictionary<string, object?> { ["page"] = page };
+        if (extraRouteValues != null)
+        {
+            foreach (var prop in extraRouteValues.GetType().GetProperties())
+            {
+                dict[prop.Name] = prop.GetValue(extraRouteValues);
+            }
+        }
+        return dict;
+    }
+}

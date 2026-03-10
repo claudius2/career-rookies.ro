@@ -1,4 +1,4 @@
-@model Workshop
+@model CareerRookies.Web.ViewModels.Admin.WorkshopFormViewModel
 @{
     ViewData["Title"] = "Adauga Workshop";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -41,8 +41,15 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Imagine workshop</label>
-                            <input type="file" name="image" class="form-control" accept="image/*" />
+                            <label asp-for="MaxCapacity" class="form-label"></label>
+                            <input asp-for="MaxCapacity" type="number" class="form-control" min="0" placeholder="Lasati gol pentru nelimitat" />
+                            <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label">Imagine workshop</label>
+                            <input asp-for="Image" class="form-control" accept="image/*" />
+                            <span asp-validation-for="Image" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -67,8 +74,9 @@
 
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label">Imagine speaker</label>
-                            <input type="file" name="speakerImage" class="form-control" accept="image/*" />
+                            <label asp-for="SpeakerImage" class="form-label">Imagine speaker</label>
+                            <input asp-for="SpeakerImage" class="form-control" accept="image/*" />
+                            <span asp-validation-for="SpeakerImage" class="text-danger"></span>
                         </div>
                     </div>
                 </div>

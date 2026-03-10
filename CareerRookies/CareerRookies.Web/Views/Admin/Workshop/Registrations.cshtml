@@ -10,9 +10,14 @@
             <h1 class="h3 mb-1">Inregistrari</h1>
             <p class="text-muted mb-0">Workshop: <strong>@Model.Title</strong></p>
         </div>
-        <a href="/Admin/Workshops" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Inapoi la workshop-uri
-        </a>
+        <div class="btn-group">
+            <a href="/Admin/Workshops/Registrations/@Model.Id/Export" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+            </a>
+            <a href="/Admin/Workshops" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Inapoi la workshop-uri
+            </a>
+        </div>
     </div>
 
     <div class="card">

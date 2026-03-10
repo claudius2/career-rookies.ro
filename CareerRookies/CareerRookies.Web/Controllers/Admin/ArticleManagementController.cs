@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CareerRookies.Web.Data;
-using CareerRookies.Web.Models;
+using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Controllers.Admin;
 
@@ -10,19 +8,19 @@ namespace CareerRookies.Web.Controllers.Admin;
 [Route("Admin/Articles")]
 public class ArticleManagementController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IArticleService _articleService;
+    private readonly IAuditService _auditService;
 
-    public ArticleManagementController(ApplicationDbContext context)
+    public ArticleManagementController(IArticleService articleService, IAuditService auditService)
     {
-        _context = context;
+        _articleService = articleService;
+        _auditService = auditService;
     }
 
     [Route("")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var articles = await _context.Articles
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync();
+        var articles = await _articleService.GetAllAsync(page);
         return View("~/Views/Admin/Article/Index.cshtml", articles);
     }
 
@@ -31,10 +29,8 @@ public class ArticleManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Approve(int id)
     {
-        var article = await _context.Articles.FindAsync(id);
-        if (article == null) return NotFound();
-        article.Status = ArticleStatus.Approved;
-        await _context.SaveChangesAsync();
+        await _articleService.ApproveAsync(id);
+        await _auditService.LogAsync("Article", id, "Approved", User.Identity?.Name);
         TempData["Success"] = "Articolul a fost aprobat.";
         return RedirectToAction("Index");
     }
@@ -44,10 +40,8 @@ public class ArticleManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reject(int id)
     {
-        var article = await _context.Articles.FindAsync(id);
-        if (article == null) return NotFound();
-        article.Status = ArticleStatus.Rejected;
-        await _context.SaveChangesAsync();
+        await _articleService.RejectAsync(id);
+        await _auditService.LogAsync("Article", id, "Rejected", User.Identity?.Name);
         TempData["Success"] = "Articolul a fost respins.";
         return RedirectToAction("Index");
     }
@@ -57,11 +51,9 @@ public class ArticleManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var article = await _context.Articles.FindAsync(id);
-        if (article == null) return NotFound();
-        _context.Articles.Remove(article);
-        await _context.SaveChangesAsync();
-        TempData["Success"] = "Articolul a fost șters.";
+        await _articleService.SoftDeleteAsync(id);
+        await _auditService.LogAsync("Article", id, "Deleted", User.Identity?.Name);
+        TempData["Success"] = "Articolul a fost sters.";
         return RedirectToAction("Index");
     }
 }
