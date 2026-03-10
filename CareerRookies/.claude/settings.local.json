@@ -19,7 +19,8 @@
       "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet build 2>&1 | tail -15)",
       "Bash(find \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web/Areas/Identity\" -type f -name \"*.cshtml\" -o -type f -name \"*.cs\" 2>/dev/null | sort)",
       "Bash(find \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web/wwwroot\" -type d ! -path \"*/node_modules/*\" 2>/dev/null | head -30)",
-      "Bash(grep -r \"Identity\" \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" --include=\"*.csproj\" --include=\"*.cs\" --include=\"*.json\" 2>/dev/null | head -20)"
+      "Bash(grep -r \"Identity\" \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" --include=\"*.csproj\" --include=\"*.cs\" --include=\"*.json\" 2>/dev/null | head -20)",
+      "Bash(find \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" -name \"*.cs\" -type f ! -path \"*/obj/*\" ! -path \"*/bin/*\" 2>/dev/null | sort)"
     ]
   }
 }

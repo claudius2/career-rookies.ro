@@ -47,6 +47,13 @@ try
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/autentificare";
+        options.LogoutPath = "/deconectare";
+        options.AccessDeniedPath = "/acces-interzis";
+    });
+
     // Services
     builder.Services.AddScoped<IWorkshopService, WorkshopService>();
     builder.Services.AddScoped<IArticleService, ArticleService>();
