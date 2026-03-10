@@ -57,7 +57,7 @@
                             </li>
                             <li class="mb-2">
                                 <i class="bi bi-person me-2" style="color: var(--cr-primary);"></i>
-                                <strong>Speaker:</strong> @Model.Workshop.SpeakerName
+                                <strong>@(Model.Workshop.WorkshopSpeakers.Count > 1 ? "Speakeri:" : "Speaker:")</strong> @Model.Workshop.SpeakerNames
                             </li>
                         </ul>
                         @if (Model.IsUpcoming)
@@ -78,30 +78,36 @@
         </div>
     </section>
 
-    <!-- Speaker -->
-    <section class="page-section section-cream" style="margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; border-radius: var(--cr-radius);">
-        <div class="section-title text-start">
-            <h2>Despre speaker</h2>
-        </div>
-        <div class="row align-items-center">
-            <div class="col-md-3 text-center mb-3 mb-md-0">
-                @if (!string.IsNullOrEmpty(Model.Workshop.SpeakerImagePath))
-                {
-                    <img src="@Model.Workshop.SpeakerImagePath" alt="@Model.Workshop.SpeakerName" class="rounded-circle img-fluid" style="width: 180px; height: 180px; object-fit: cover; border: 3px solid var(--cr-secondary);">
-                }
-                else
-                {
-                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 180px; height: 180px; background: linear-gradient(135deg, var(--cr-primary) 0%, var(--cr-primary-dark) 100%);">
-                        <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+    <!-- Speakeri -->
+    @if (Model.Workshop.WorkshopSpeakers.Any())
+    {
+        <section class="page-section section-cream" style="margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; border-radius: var(--cr-radius);">
+            <div class="section-title text-start">
+                <h2>@(Model.Workshop.WorkshopSpeakers.Count > 1 ? "Despre speakeri" : "Despre speaker")</h2>
+            </div>
+            @foreach (var ws in Model.Workshop.WorkshopSpeakers.OrderBy(x => x.SortOrder))
+            {
+                <div class="row align-items-center @(Model.Workshop.WorkshopSpeakers.Count > 1 ? "mb-4 pb-4 border-bottom" : "")">
+                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                        @if (!string.IsNullOrEmpty(ws.Speaker.ImagePath))
+                        {
+                            <img src="@ws.Speaker.ImagePath" alt="@ws.Speaker.Name" class="rounded-circle img-fluid" style="width: 180px; height: 180px; object-fit: cover; border: 3px solid var(--cr-secondary);">
+                        }
+                        else
+                        {
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 180px; height: 180px; background: linear-gradient(135deg, var(--cr-primary) 0%, var(--cr-primary-dark) 100%);">
+                                <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+                            </div>
+                        }
                     </div>
-                }
-            </div>
-            <div class="col-md-9">
-                <h4 class="fw-bold" style="color: var(--cr-primary-dark);">@Model.Workshop.SpeakerName</h4>
-                <p style="white-space: pre-wrap;">@Model.Workshop.SpeakerDescription</p>
-            </div>
-        </div>
-    </section>
+                    <div class="col-md-9">
+                        <h4 class="fw-bold" style="color: var(--cr-primary-dark);">@ws.Speaker.Name</h4>
+                        <p style="white-space: pre-wrap;">@ws.Speaker.Description</p>
+                    </div>
+                </div>
+            }
+        </section>
+    }
 
     @if (Model.IsUpcoming)
     {

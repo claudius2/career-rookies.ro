@@ -24,4 +24,8 @@ public interface IWorkshopService
     Task DeleteMediaAsync(int mediaId);
     Task<int> GetNextMediaSortOrderAsync(int workshopId);
     Task<byte[]> ExportRegistrationsCsvAsync(int workshopId);
+    Task SetWorkshopSpeakersAsync(int workshopId, List<int> speakerIds);
+    Task<Speaker> CreateSpeakerAsync(Speaker speaker);
+    Task<Speaker?> GetSpeakerByNameAsync(string name);
+    Task UpdateSpeakerAsync(Speaker speaker);
 }

@@ -29,18 +29,6 @@ public class Workshop : ITimestamped, ISoftDeletable
     [Range(0, 10000, ErrorMessage = "Capacitatea trebuie sa fie intre 0 si 10000.")]
     public int? MaxCapacity { get; set; }
 
-    [Required(ErrorMessage = "Numele speaker-ului este obligatoriu.")]
-    [MaxLength(100)]
-    [Display(Name = "Nume speaker")]
-    public string SpeakerName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Descrierea speaker-ului este obligatorie.")]
-    [Display(Name = "Descriere speaker")]
-    public string SpeakerDescription { get; set; } = string.Empty;
-
-    [Display(Name = "Imagine speaker")]
-    public string? SpeakerImagePath { get; set; }
-
     [Display(Name = "Imagine")]
     public string? ImagePath { get; set; }
 
@@ -53,8 +41,14 @@ public class Workshop : ITimestamped, ISoftDeletable
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
 
+    public ICollection<WorkshopSpeaker> WorkshopSpeakers { get; set; } = new List<WorkshopSpeaker>();
     public ICollection<WorkshopRegistration> Registrations { get; set; } = new List<WorkshopRegistration>();
     public ICollection<WorkshopMedia> Media { get; set; } = new List<WorkshopMedia>();
+
+    /// <summary>Helper to get speaker names as a comma-separated string.</summary>
+    public string SpeakerNames => WorkshopSpeakers.Any()
+        ? string.Join(", ", WorkshopSpeakers.OrderBy(ws => ws.SortOrder).Select(ws => ws.Speaker.Name))
+        : string.Empty;
 
     public int RegistrationCount => Registrations.Count;
     public bool IsFull => MaxCapacity.HasValue && RegistrationCount >= MaxCapacity.Value;

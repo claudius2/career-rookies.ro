@@ -55,30 +55,48 @@
                 </div>
 
                 <hr class="my-4" />
-                <h5 class="mb-3">Informatii Speaker</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Speakeri</h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addSpeakerBtn">
+                        <i class="bi bi-plus-lg me-1"></i> Adauga speaker
+                    </button>
+                </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label asp-for="SpeakerName" class="form-label"></label>
-                            <input asp-for="SpeakerName" class="form-control" placeholder="Numele speaker-ului" />
-                            <span asp-validation-for="SpeakerName" class="text-danger"></span>
+                <div id="speakersContainer">
+                    @for (int i = 0; i < Model.Speakers.Count; i++)
+                    {
+                        <div class="speaker-item card mb-3" data-index="@i">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Speaker #<span class="speaker-number">@(i + 1)</span></h6>
+                                    @if (i > 0)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-speaker">
+                                            <i class="bi bi-trash"></i> Sterge
+                                        </button>
+                                    }
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nume speaker</label>
+                                            <input name="Speakers[@i].Name" value="@Model.Speakers[i].Name" class="form-control" placeholder="Numele speaker-ului" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Descriere speaker</label>
+                                            <textarea name="Speakers[@i].Description" class="form-control" rows="4" placeholder="Descrierea speaker-ului" required>@Model.Speakers[i].Description</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Imagine speaker</label>
+                                            <input name="Speakers[@i].Image" type="file" class="form-control" accept="image/*" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label asp-for="SpeakerDescription" class="form-label"></label>
-                            <textarea asp-for="SpeakerDescription" class="form-control" rows="4" placeholder="Descrierea speaker-ului"></textarea>
-                            <span asp-validation-for="SpeakerDescription" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label asp-for="SpeakerImage" class="form-label">Imagine speaker</label>
-                            <input asp-for="SpeakerImage" class="form-control" accept="image/*" />
-                            <span asp-validation-for="SpeakerImage" class="text-danger"></span>
-                        </div>
-                    </div>
+                    }
                 </div>
 
                 <hr class="my-4" />
@@ -112,6 +130,60 @@
             setup: function (editor) {
                 editor.on('change', function () { editor.save(); });
             }
+        });
+
+        // Dynamic speaker management
+        document.getElementById('addSpeakerBtn').addEventListener('click', function () {
+            var container = document.getElementById('speakersContainer');
+            var index = container.querySelectorAll('.speaker-item').length;
+            var html = `
+                <div class="speaker-item card mb-3" data-index="${index}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Speaker #<span class="speaker-number">${index + 1}</span></h6>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-speaker">
+                                <i class="bi bi-trash"></i> Sterge
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nume speaker</label>
+                                    <input name="Speakers[${index}].Name" class="form-control" placeholder="Numele speaker-ului" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Descriere speaker</label>
+                                    <textarea name="Speakers[${index}].Description" class="form-control" rows="4" placeholder="Descrierea speaker-ului" required></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Imagine speaker</label>
+                                    <input name="Speakers[${index}].Image" type="file" class="form-control" accept="image/*" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+        document.getElementById('speakersContainer').addEventListener('click', function (e) {
+            var btn = e.target.closest('.remove-speaker');
+            if (!btn) return;
+            btn.closest('.speaker-item').remove();
+            // Re-index speakers
+            var items = document.querySelectorAll('.speaker-item');
+            items.forEach(function (item, idx) {
+                item.dataset.index = idx;
+                item.querySelector('.speaker-number').textContent = idx + 1;
+                item.querySelectorAll('[name]').forEach(function (input) {
+                    input.name = input.name.replace(/Speakers\[\d+\]/, 'Speakers[' + idx + ']');
+                });
+                // Show/hide remove button (always show if more than 1)
+                var removeBtn = item.querySelector('.remove-speaker');
+                if (removeBtn) removeBtn.style.display = items.length > 1 ? '' : 'none';
+            });
         });
     </script>
 }

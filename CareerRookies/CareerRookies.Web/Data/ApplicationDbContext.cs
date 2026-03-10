@@ -14,6 +14,8 @@ public class ApplicationDbContext : IdentityDbContext
     }
 
     public DbSet<Workshop> Workshops => Set<Workshop>();
+    public DbSet<Speaker> Speakers => Set<Speaker>();
+    public DbSet<WorkshopSpeaker> WorkshopSpeakers => Set<WorkshopSpeaker>();
     public DbSet<WorkshopRegistration> WorkshopRegistrations => Set<WorkshopRegistration>();
     public DbSet<WorkshopMedia> WorkshopMedia => Set<WorkshopMedia>();
     public DbSet<StudentClass> StudentClasses => Set<StudentClass>();
@@ -96,6 +98,28 @@ public class ApplicationDbContext : IdentityDbContext
             entity.Property(t => t.Name).HasMaxLength(128);
         });
 
+        // Speaker
+        builder.Entity<Speaker>(entity =>
+        {
+            entity.HasIndex(s => s.Name);
+        });
+
+        // WorkshopSpeaker (join table)
+        builder.Entity<WorkshopSpeaker>(entity =>
+        {
+            entity.HasKey(ws => new { ws.WorkshopId, ws.SpeakerId });
+
+            entity.HasOne(ws => ws.Workshop)
+                .WithMany(w => w.WorkshopSpeakers)
+                .HasForeignKey(ws => ws.WorkshopId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ws => ws.Speaker)
+                .WithMany(s => s.WorkshopSpeakers)
+                .HasForeignKey(ws => ws.SpeakerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         // Workshop
         builder.Entity<Workshop>(entity =>
         {
@@ -113,6 +137,7 @@ public class ApplicationDbContext : IdentityDbContext
             entity.HasIndex(w => w.Slug).IsUnique();
             entity.HasIndex(w => w.IsDeleted);
             entity.HasQueryFilter(w => !w.IsDeleted);
+            entity.Ignore(w => w.SpeakerNames);
         });
 
         // WorkshopRegistration

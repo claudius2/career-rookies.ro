@@ -19,6 +19,8 @@ public class WorkshopService : IWorkshopService
     public async Task<PagedResult<Workshop>> GetUpcomingAsync(int page = 1, int pageSize = 10)
     {
         var query = _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Where(w => w.Date > DateTime.UtcNow && !w.IsDeleted)
             .OrderBy(w => w.Date);
 
@@ -28,6 +30,8 @@ public class WorkshopService : IWorkshopService
     public async Task<PagedResult<Workshop>> GetPastAsync(int page = 1, int pageSize = 10)
     {
         var query = _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Where(w => w.Date <= DateTime.UtcNow && !w.IsDeleted)
             .OrderByDescending(w => w.Date);
 
@@ -37,12 +41,16 @@ public class WorkshopService : IWorkshopService
     public async Task<Workshop?> GetByIdAsync(int id)
     {
         return await _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
     }
 
     public async Task<Workshop?> GetBySlugAsync(string slug)
     {
         return await _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Include(w => w.Media.OrderBy(m => m.SortOrder))
             .FirstOrDefaultAsync(w => w.Slug == slug && !w.IsDeleted);
     }
@@ -50,6 +58,8 @@ public class WorkshopService : IWorkshopService
     public async Task<Workshop?> GetWithMediaAsync(int id)
     {
         return await _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Include(w => w.Media.OrderBy(m => m.SortOrder))
             .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
     }
@@ -57,6 +67,8 @@ public class WorkshopService : IWorkshopService
     public async Task<Workshop?> GetWithRegistrationsAsync(int id)
     {
         return await _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Include(w => w.Registrations)
                 .ThenInclude(r => r.StudentClass)
             .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
@@ -65,6 +77,8 @@ public class WorkshopService : IWorkshopService
     public async Task<List<Workshop>> GetUpcomingTopAsync(int count)
     {
         return await _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Where(w => w.Date > DateTime.UtcNow && !w.IsDeleted)
             .OrderBy(w => w.Date)
             .Take(count)
@@ -74,6 +88,8 @@ public class WorkshopService : IWorkshopService
     public async Task<PagedResult<Workshop>> GetAllAsync(int page = 1, int pageSize = 20)
     {
         var query = _context.Workshops
+            .Include(w => w.WorkshopSpeakers.OrderBy(ws => ws.SortOrder))
+                .ThenInclude(ws => ws.Speaker)
             .Where(w => !w.IsDeleted)
             .OrderByDescending(w => w.Date);
 
@@ -185,6 +201,45 @@ public class WorkshopService : IWorkshopService
         }
 
         return Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+    }
+
+    public async Task SetWorkshopSpeakersAsync(int workshopId, List<int> speakerIds)
+    {
+        var existing = await _context.WorkshopSpeakers
+            .Where(ws => ws.WorkshopId == workshopId)
+            .ToListAsync();
+
+        _context.WorkshopSpeakers.RemoveRange(existing);
+
+        for (int i = 0; i < speakerIds.Count; i++)
+        {
+            _context.WorkshopSpeakers.Add(new WorkshopSpeaker
+            {
+                WorkshopId = workshopId,
+                SpeakerId = speakerIds[i],
+                SortOrder = i
+            });
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Speaker> CreateSpeakerAsync(Speaker speaker)
+    {
+        _context.Speakers.Add(speaker);
+        await _context.SaveChangesAsync();
+        return speaker;
+    }
+
+    public async Task<Speaker?> GetSpeakerByNameAsync(string name)
+    {
+        return await _context.Speakers
+            .FirstOrDefaultAsync(s => s.Name == name);
+    }
+
+    public async Task UpdateSpeakerAsync(Speaker speaker)
+    {
+        await _context.SaveChangesAsync();
     }
 
     private static string EscapeCsvField(string field)

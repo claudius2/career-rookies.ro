@@ -43,7 +43,11 @@ public class WorkshopManagementController : Controller
     [Route("Create")]
     public IActionResult Create()
     {
-        return View("~/Views/Admin/Workshop/Create.cshtml", new WorkshopFormViewModel());
+        var model = new WorkshopFormViewModel
+        {
+            Speakers = new List<SpeakerFormItem> { new() }
+        };
+        return View("~/Views/Admin/Workshop/Create.cshtml", model);
     }
 
     [HttpPost]
@@ -51,6 +55,16 @@ public class WorkshopManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(WorkshopFormViewModel model)
     {
+        if (model.Speakers == null || model.Speakers.Count == 0)
+        {
+            ModelState.AddModelError("", "Trebuie sa adaugati cel putin un speaker.");
+            return View("~/Views/Admin/Workshop/Create.cshtml", model);
+        }
+
+        // Remove validation errors for old single-speaker properties
+        ModelState.Remove("SpeakerName");
+        ModelState.Remove("SpeakerDescription");
+
         if (!ModelState.IsValid)
             return View("~/Views/Admin/Workshop/Create.cshtml", model);
 
@@ -59,9 +73,7 @@ public class WorkshopManagementController : Controller
             Title = model.Title,
             Description = _htmlSanitizer.Sanitize(model.Description),
             Date = model.Date,
-            MaxCapacity = model.MaxCapacity,
-            SpeakerName = model.SpeakerName,
-            SpeakerDescription = model.SpeakerDescription
+            MaxCapacity = model.MaxCapacity
         };
 
         if (model.Image != null)
@@ -75,18 +87,30 @@ public class WorkshopManagementController : Controller
             workshop.ImagePath = path;
         }
 
-        if (model.SpeakerImage != null)
+        await _workshopService.CreateAsync(workshop);
+
+        // Create/link speakers
+        var speakerIds = new List<int>();
+        for (int i = 0; i < model.Speakers.Count; i++)
         {
-            var path = await _fileService.SaveImageAsync(model.SpeakerImage, "speakers");
-            if (path == null)
+            var speakerForm = model.Speakers[i];
+            var speaker = new Speaker
             {
-                ModelState.AddModelError("SpeakerImage", "Fisierul nu a putut fi salvat. Verificati tipul si dimensiunea.");
-                return View("~/Views/Admin/Workshop/Create.cshtml", model);
+                Name = speakerForm.Name,
+                Description = speakerForm.Description
+            };
+
+            if (speakerForm.Image != null)
+            {
+                var path = await _fileService.SaveImageAsync(speakerForm.Image, "speakers");
+                if (path != null) speaker.ImagePath = path;
             }
-            workshop.SpeakerImagePath = path;
+
+            await _workshopService.CreateSpeakerAsync(speaker);
+            speakerIds.Add(speaker.Id);
         }
 
-        await _workshopService.CreateAsync(workshop);
+        await _workshopService.SetWorkshopSpeakersAsync(workshop.Id, speakerIds);
         await _auditService.LogAsync("Workshop", workshop.Id, "Created", User.Identity?.Name);
 
         TempData["Success"] = "Workshop-ul a fost creat cu succes.";
@@ -106,11 +130,21 @@ public class WorkshopManagementController : Controller
             Description = workshop.Description,
             Date = workshop.Date,
             MaxCapacity = workshop.MaxCapacity,
-            SpeakerName = workshop.SpeakerName,
-            SpeakerDescription = workshop.SpeakerDescription,
             ExistingImagePath = workshop.ImagePath,
-            ExistingSpeakerImagePath = workshop.SpeakerImagePath
+            Speakers = workshop.WorkshopSpeakers
+                .OrderBy(ws => ws.SortOrder)
+                .Select(ws => new SpeakerFormItem
+                {
+                    Id = ws.Speaker.Id,
+                    Name = ws.Speaker.Name,
+                    Description = ws.Speaker.Description,
+                    ExistingImagePath = ws.Speaker.ImagePath
+                })
+                .ToList()
         };
+
+        if (model.Speakers.Count == 0)
+            model.Speakers.Add(new SpeakerFormItem());
 
         return View("~/Views/Admin/Workshop/Edit.cshtml", model);
     }
@@ -125,10 +159,19 @@ public class WorkshopManagementController : Controller
         var workshop = await _workshopService.GetByIdAsync(id);
         if (workshop == null) return NotFound();
 
+        if (model.Speakers == null || model.Speakers.Count == 0)
+        {
+            ModelState.AddModelError("", "Trebuie sa adaugati cel putin un speaker.");
+            model.ExistingImagePath = workshop.ImagePath;
+            return View("~/Views/Admin/Workshop/Edit.cshtml", model);
+        }
+
+        ModelState.Remove("SpeakerName");
+        ModelState.Remove("SpeakerDescription");
+
         if (!ModelState.IsValid)
         {
             model.ExistingImagePath = workshop.ImagePath;
-            model.ExistingSpeakerImagePath = workshop.SpeakerImagePath;
             return View("~/Views/Admin/Workshop/Edit.cshtml", model);
         }
 
@@ -136,8 +179,6 @@ public class WorkshopManagementController : Controller
         workshop.Description = _htmlSanitizer.Sanitize(model.Description);
         workshop.Date = model.Date;
         workshop.MaxCapacity = model.MaxCapacity;
-        workshop.SpeakerName = model.SpeakerName;
-        workshop.SpeakerDescription = model.SpeakerDescription;
 
         if (model.Image != null)
         {
@@ -146,27 +187,67 @@ public class WorkshopManagementController : Controller
             {
                 ModelState.AddModelError("Image", "Fisierul nu a putut fi salvat.");
                 model.ExistingImagePath = workshop.ImagePath;
-                model.ExistingSpeakerImagePath = workshop.SpeakerImagePath;
                 return View("~/Views/Admin/Workshop/Edit.cshtml", model);
             }
             _fileService.DeleteFile(workshop.ImagePath);
             workshop.ImagePath = path;
         }
 
-        if (model.SpeakerImage != null)
+        // Update speakers
+        var speakerIds = new List<int>();
+        for (int i = 0; i < model.Speakers.Count; i++)
         {
-            var path = await _fileService.SaveImageAsync(model.SpeakerImage, "speakers");
-            if (path == null)
+            var speakerForm = model.Speakers[i];
+
+            if (speakerForm.Id.HasValue && speakerForm.Id.Value > 0)
             {
-                ModelState.AddModelError("SpeakerImage", "Fisierul nu a putut fi salvat.");
-                model.ExistingImagePath = workshop.ImagePath;
-                model.ExistingSpeakerImagePath = workshop.SpeakerImagePath;
-                return View("~/Views/Admin/Workshop/Edit.cshtml", model);
+                // Update existing speaker
+                var existingSpeaker = workshop.WorkshopSpeakers
+                    .FirstOrDefault(ws => ws.SpeakerId == speakerForm.Id.Value)?.Speaker;
+
+                if (existingSpeaker != null)
+                {
+                    existingSpeaker.Name = speakerForm.Name;
+                    existingSpeaker.Description = speakerForm.Description;
+
+                    if (speakerForm.Image != null)
+                    {
+                        var path = await _fileService.SaveImageAsync(speakerForm.Image, "speakers");
+                        if (path != null)
+                        {
+                            _fileService.DeleteFile(existingSpeaker.ImagePath);
+                            existingSpeaker.ImagePath = path;
+                        }
+                    }
+
+                    await _workshopService.UpdateSpeakerAsync(existingSpeaker);
+                    speakerIds.Add(existingSpeaker.Id);
+                    continue;
+                }
             }
-            _fileService.DeleteFile(workshop.SpeakerImagePath);
-            workshop.SpeakerImagePath = path;
+
+            // Create new speaker
+            var speaker = new Speaker
+            {
+                Name = speakerForm.Name,
+                Description = speakerForm.Description
+            };
+
+            if (speakerForm.Image != null)
+            {
+                var path = await _fileService.SaveImageAsync(speakerForm.Image, "speakers");
+                if (path != null) speaker.ImagePath = path;
+            }
+            else if (!string.IsNullOrEmpty(speakerForm.ExistingImagePath))
+            {
+                speaker.ImagePath = speakerForm.ExistingImagePath;
+            }
+
+            await _workshopService.CreateSpeakerAsync(speaker);
+            speakerIds.Add(speaker.Id);
         }
 
+        await _workshopService.SetWorkshopSpeakersAsync(workshop.Id, speakerIds);
         await _workshopService.UpdateAsync(workshop);
         await _auditService.LogAsync("Workshop", workshop.Id, "Updated", User.Identity?.Name);
 
