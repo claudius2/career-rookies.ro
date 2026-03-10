@@ -4,7 +4,7 @@
     ViewData["Title"] = "Autentificare";
 }
 
-<section style="min-height: calc(100vh - 70px); display: flex; align-items: center; background: linear-gradient(135deg, rgba(91,26,74,0.05) 0%, rgba(194,24,91,0.08) 50%, rgba(255,193,7,0.05) 100%);">
+<section style="min-height: calc(100vh - 95px); display: flex; align-items: center; background: linear-gradient(135deg, rgba(91,26,74,0.05) 0%, rgba(194,24,91,0.08) 50%, rgba(255,193,7,0.05) 100%);">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-5 col-md-7 col-sm-10">
@@ -12,7 +12,7 @@
                 <!-- Logo -->
                 <div class="text-center mb-4">
                     <a href="/">
-                        <img src="/images/logo.png" height="80" alt="Career Rookies" />
+                        <img src="/images/logo.png" height="55" alt="Career Rookies" />
                     </a>
                     <h2 class="mt-3 fw-bold" style="color: var(--cr-primary-dark); font-family: var(--cr-font-heading);">
                         Bine ai revenit!
@@ -24,7 +24,7 @@
                 <div class="card shadow-lg border-0" style="border-radius: var(--cr-radius);">
                     <div class="card-body p-4 p-md-5">
 
-                        <form id="account" method="post">
+                        <form id="account" method="post" asp-page="/Account/Login" asp-area="Identity" asp-route-returnUrl="@Model.ReturnUrl">
                             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="border-radius: var(--cr-radius-sm);"></div>
 
                             <!-- Email -->
@@ -44,7 +44,7 @@
                                     <i class="bi bi-lock me-1"></i>Parolă
                                 </label>
                                 <div class="input-group">
-                                    <input asp-for="Input.Password" id="passwordInput" class="form-control form-control-lg" placeholder="Introdu parola"
+                                    <input asp-for="Input.Password" class="form-control form-control-lg" placeholder="Introdu parola"
                                            style="border-radius: var(--cr-radius-sm) 0 0 var(--cr-radius-sm); border-color: #ddd;"
                                            autocomplete="current-password" />
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword"
@@ -58,7 +58,7 @@
                             <!-- Remember Me -->
                             <div class="mb-4">
                                 <div class="form-check">
-                                    <input asp-for="Input.RememberMe" class="form-check-input" style="border-color: var(--cr-primary);" />
+                                    <input type="checkbox" asp-for="Input.RememberMe" class="form-check-input" style="border-color: var(--cr-primary);" />
                                     <label asp-for="Input.RememberMe" class="form-check-label" style="color: #666;">
                                         Ține-mă minte
                                     </label>
@@ -92,7 +92,7 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.getElementById('togglePassword').addEventListener('click', function () {
-            var input = document.getElementById('passwordInput');
+            var input = document.getElementById('Input_Password');
             var icon = document.getElementById('toggleIcon');
             if (input.type === 'password') {
                 input.type = 'text';
