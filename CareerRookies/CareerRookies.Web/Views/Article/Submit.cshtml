@@ -34,14 +34,26 @@
 
                             <div class="mb-4">
                                 <label asp-for="Content" class="form-label"></label>
-                                <textarea asp-for="Content" class="form-control" rows="10" placeholder="Scrie conținutul articolului aici..."></textarea>
+                                <textarea asp-for="Content" id="article-editor" class="form-control" rows="10" placeholder="Scrie conținutul articolului aici..."></textarea>
                                 <span asp-validation-for="Content" class="text-danger"></span>
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary-cr btn-lg">
-                                    <i class="bi bi-send me-2"></i>Trimite articolul
-                                </button>
+                                @if (ViewBag.RecaptchaEnabled == true)
+                                {
+                                    <button type="submit" class="btn btn-primary-cr btn-lg g-recaptcha"
+                                            data-sitekey="@ViewBag.RecaptchaSiteKey"
+                                            data-callback="onArticleSubmit"
+                                            data-action="submit">
+                                        <i class="bi bi-send me-2"></i>Trimite articolul
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-primary-cr btn-lg">
+                                        <i class="bi bi-send me-2"></i>Trimite articolul
+                                    </button>
+                                }
                             </div>
                         </form>
                     </div>
@@ -59,4 +71,36 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#article-editor',
+            language: 'ro',
+            height: 400,
+            menubar: false,
+            plugins: 'lists link autolink wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | link | removeformat',
+            block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3; Heading 4=h4; Blockquote=blockquote',
+            content_style: 'body { font-family: "Open Sans", sans-serif; font-size: 16px; line-height: 1.6; }',
+            branding: false,
+            promotion: false,
+            statusbar: true,
+            paste_as_text: false,
+            valid_elements: 'p,br,strong/b,em/i,u,h2,h3,h4,blockquote,ul,ol,li,a[href|target],hr,code,pre',
+            setup: function (editor) {
+                editor.on('change', function () {
+                    editor.save();
+                });
+            }
+        });
+    </script>
+    @if (ViewBag.RecaptchaEnabled == true)
+    {
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script>
+            function onArticleSubmit(token) {
+                document.querySelector('form[action*="Submit"]').submit();
+            }
+        </script>
+    }
 }

@@ -78,23 +78,23 @@
 ### Security
 
 6. [x] **Add rate limiting** -- `PublicForm` (5 req/min) and `General` (60 req/min) policies via `Microsoft.AspNetCore.RateLimiting`.
-7. [ ] **Add CAPTCHA to public forms** -- Requires external service (Google reCAPTCHA key). Configure manually.
-8. [ ] **HTML sanitization library** -- Views still use `@Html.Raw()`. Add HtmlSanitizer NuGet when ready to strip dangerous tags.
+7. [x] **Add CAPTCHA to public forms** -- Google reCAPTCHA v2 integrated. `RecaptchaService` + `IRecaptchaService`. Auto-skips if keys not configured. Added to Article Submit and Workshop Registration forms. Configure `Recaptcha:SiteKey` and `Recaptcha:SecretKey` in appsettings or environment variables.
+8. [x] **HTML sanitization library** -- `HtmlSanitizer` NuGet (v9.0.892). `HtmlSanitizerService` sanitizes article content on submit and workshop descriptions on save. Safe tags allowed (headings, lists, links, tables, images). `@Html.Raw()` now safe in Article/Detail and Workshop/Detail views.
 9. [x] **Move secrets to environment variables** -- Production uses `web.config` env vars. `appsettings.json` has placeholder for AdminSettings:Password.
-10. [ ] **Add CORS policy** -- Not needed yet (no API endpoints). Add when needed.
+10. [x] **Add CORS policy** -- `AddCors` with configurable `Cors:AllowedOrigins` array. Production config includes `careerrookies.ro` and `www.careerrookies.ro`. `app.UseCors("Default")` in pipeline.
 11. [x] **Add Content Security Policy headers** -- `SecurityHeadersMiddleware` adds CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
 
 ### Features
 
 12. [x] **Pagination** -- `PagedResult<T>` with `_Pagination.cshtml` partial. All list pages (public + admin) now paginated.
-13. [ ] **Article rich text editor** -- Frontend library choice (TinyMCE/Quill). Add when ready.
+13. [x] **Article rich text editor** -- TinyMCE 7 via CDN. Configured for Article Submit (public) and Workshop Create/Edit (admin) with safe toolbar (formatting, lists, links). Romanian language. Content sanitized server-side via HtmlSanitizer.
 14. [x] **Testimonial moderation** -- `IsApproved` flag with admin approve/reject workflow. Only approved testimonials shown publicly.
 15. [x] **Article status enum** -- `ArticleStatus { Pending, Approved, Rejected }` with full admin workflow.
 16. [x] **Workshop capacity limit** -- `MaxCapacity` field, registration check in `CanRegisterAsync`, UI shows capacity in admin and public views.
 17. [x] **Link StudentClass to WorkshopRegistration via FK** -- Proper FK relationship configured.
 18. [ ] **Article author tracking via Identity** -- Requires authentication on article submit. Future enhancement.
 19. [x] **SEO-friendly URLs** -- `Slug` property on Article + Workshop with Romanian diacritics handling. Routes: `/Article/{slug}`, `/Workshop/{slug}`.
-20. [ ] **Image optimization** -- Requires ImageSharp or similar library. Future enhancement.
+20. [x] **Image optimization** -- `SixLabors.ImageSharp` (v3.1.12). Images auto-resized to max 1920x1080, saved as JPEG at 80% quality. Thumbnails generated (400x300) in `/thumbs/` subfolder. Fallback to original on failure. Old thumbnails cleaned up on delete.
 21. [ ] **Email notifications** -- Requires SMTP configuration. Future enhancement.
 22. [x] **Search functionality** -- `Home/Search` action with article search across title, content, author.
 23. [ ] **Workshop categories/tags** -- Requires new entity + UI. Future enhancement.

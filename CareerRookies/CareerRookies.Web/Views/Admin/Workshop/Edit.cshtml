@@ -29,7 +29,7 @@
 
                         <div class="mb-3">
                             <label asp-for="Description" class="form-label"></label>
-                            <textarea asp-for="Description" class="form-control" rows="5" placeholder="Descrierea workshop-ului"></textarea>
+                            <textarea asp-for="Description" id="workshop-description" class="form-control" rows="5" placeholder="Descrierea workshop-ului"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                     </div>
@@ -111,4 +111,22 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#workshop-description',
+            language: 'ro',
+            height: 300,
+            menubar: false,
+            plugins: 'lists link autolink wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | link | removeformat',
+            block_formats: 'Paragraph=p; Heading 3=h3; Heading 4=h4; Blockquote=blockquote',
+            content_style: 'body { font-family: "Open Sans", sans-serif; font-size: 14px; }',
+            branding: false,
+            promotion: false,
+            setup: function (editor) {
+                editor.on('change', function () { editor.save(); });
+            }
+        });
+    </script>
 }

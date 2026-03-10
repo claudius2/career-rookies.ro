@@ -8,7 +8,13 @@
       "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && mkdir -p Services/Interfaces && mkdir -p Middleware && mkdir -p ViewModels/Admin && ls Services/ Middleware/ ViewModels/Admin/)",
       "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet restore 2>&1 && dotnet build --no-restore 2>&1)",
       "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet build 2>&1)",
-      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet ef migrations add ArchitectureImprovements --context ApplicationDbContext 2>&1)"
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet ef migrations add ArchitectureImprovements --context ApplicationDbContext 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet add package Ganss.Xss --version 8.0.0 && dotnet add package SixLabors.ImageSharp --version 3.1.7)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet add package HtmlSanitizer)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet add package SixLabors.ImageSharp --version 3.1.7)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet add package SixLabors.ImageSharp)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet build 2>&1 | tail -30)",
+      "Bash(cd \"C:\\\\Users\\\\Claudiu\\\\Documents\\\\WORK\\\\RXT IT\\\\2026\\\\career-rookies.ro\\\\CareerRookies\\\\CareerRookies.Web\" && dotnet build 2>&1 | tail -10)"
     ]
   }
 }

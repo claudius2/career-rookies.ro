@@ -40,7 +40,7 @@
                 <div class="section-title text-start">
                     <h2>Despre acest workshop</h2>
                 </div>
-                <div class="workshop-description" style="white-space: pre-wrap;">@Model.Workshop.Description</div>
+                <div class="workshop-description">@Html.Raw(Model.Workshop.Description)</div>
             </div>
             <div class="col-lg-4">
                 <div class="card card-cr">
@@ -148,9 +148,21 @@
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary-cr btn-lg">
-                                        <i class="bi bi-send me-2"></i>Trimite înscrierea
-                                    </button>
+                                    @if (ViewBag.RecaptchaEnabled == true)
+                                    {
+                                        <button type="submit" class="btn btn-primary-cr btn-lg g-recaptcha"
+                                                data-sitekey="@ViewBag.RecaptchaSiteKey"
+                                                data-callback="onRegisterSubmit"
+                                                data-action="register">
+                                            <i class="bi bi-send me-2"></i>Trimite înscrierea
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-primary-cr btn-lg">
+                                            <i class="bi bi-send me-2"></i>Trimite înscrierea
+                                        </button>
+                                    }
                                 </div>
                             </form>
                         </div>
@@ -212,4 +224,13 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @if (ViewBag.RecaptchaEnabled == true)
+    {
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script>
+            function onRegisterSubmit(token) {
+                document.querySelector('form[action*="Register"]').submit();
+            }
+        </script>
+    }
 }

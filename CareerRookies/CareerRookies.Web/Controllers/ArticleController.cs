@@ -7,10 +7,14 @@ namespace CareerRookies.Web.Controllers;
 public class ArticleController : Controller
 {
     private readonly IArticleService _articleService;
+    private readonly IHtmlSanitizerService _htmlSanitizer;
+    private readonly IRecaptchaService _recaptchaService;
 
-    public ArticleController(IArticleService articleService)
+    public ArticleController(IArticleService articleService, IHtmlSanitizerService htmlSanitizer, IRecaptchaService recaptchaService)
     {
         _articleService = articleService;
+        _htmlSanitizer = htmlSanitizer;
+        _recaptchaService = recaptchaService;
     }
 
     public async Task<IActionResult> Index(int page = 1)
@@ -36,6 +40,8 @@ public class ArticleController : Controller
 
     public IActionResult Submit()
     {
+        ViewBag.RecaptchaSiteKey = _recaptchaService.SiteKey;
+        ViewBag.RecaptchaEnabled = _recaptchaService.IsEnabled;
         return View(new ArticleSubmitViewModel());
     }
 
@@ -43,9 +49,22 @@ public class ArticleController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Submit(ArticleSubmitViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+        // Verify reCAPTCHA
+        var recaptchaResponse = Request.Form["g-recaptcha-response"].ToString();
+        if (!await _recaptchaService.VerifyAsync(recaptchaResponse))
+        {
+            ModelState.AddModelError(string.Empty, "Verificarea reCAPTCHA a eșuat. Încearcă din nou.");
+        }
 
-        await _articleService.SubmitAsync(model.Title, model.Content, model.AuthorName);
+        if (!ModelState.IsValid)
+        {
+            ViewBag.RecaptchaSiteKey = _recaptchaService.SiteKey;
+            ViewBag.RecaptchaEnabled = _recaptchaService.IsEnabled;
+            return View(model);
+        }
+
+        var sanitizedContent = _htmlSanitizer.Sanitize(model.Content);
+        await _articleService.SubmitAsync(model.Title, sanitizedContent, model.AuthorName);
 
         TempData["Success"] = "Articolul a fost trimis si va fi revizuit de echipa noastra.";
         return RedirectToAction("Index");

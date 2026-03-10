@@ -13,6 +13,7 @@ public class WorkshopManagementController : Controller
     private readonly IWorkshopService _workshopService;
     private readonly IFileService _fileService;
     private readonly IAuditService _auditService;
+    private readonly IHtmlSanitizerService _htmlSanitizer;
 
     private static readonly HashSet<string> AllowedVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
         { ".mp4", ".webm", ".mov" };
@@ -23,11 +24,13 @@ public class WorkshopManagementController : Controller
     public WorkshopManagementController(
         IWorkshopService workshopService,
         IFileService fileService,
-        IAuditService auditService)
+        IAuditService auditService,
+        IHtmlSanitizerService htmlSanitizer)
     {
         _workshopService = workshopService;
         _fileService = fileService;
         _auditService = auditService;
+        _htmlSanitizer = htmlSanitizer;
     }
 
     [Route("")]
@@ -54,7 +57,7 @@ public class WorkshopManagementController : Controller
         var workshop = new Workshop
         {
             Title = model.Title,
-            Description = model.Description,
+            Description = _htmlSanitizer.Sanitize(model.Description),
             Date = model.Date,
             MaxCapacity = model.MaxCapacity,
             SpeakerName = model.SpeakerName,
@@ -130,7 +133,7 @@ public class WorkshopManagementController : Controller
         }
 
         workshop.Title = model.Title;
-        workshop.Description = model.Description;
+        workshop.Description = _htmlSanitizer.Sanitize(model.Description);
         workshop.Date = model.Date;
         workshop.MaxCapacity = model.MaxCapacity;
         workshop.SpeakerName = model.SpeakerName;

@@ -57,6 +57,30 @@ try
     builder.Services.AddScoped<IFileService, FileService>();
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<IDashboardService, DashboardService>();
+    builder.Services.AddSingleton<IHtmlSanitizerService, HtmlSanitizerService>();
+    builder.Services.AddSingleton<IRecaptchaService, RecaptchaService>();
+    builder.Services.AddHttpClient();
+
+    // CORS
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("Default", policy =>
+        {
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            if (allowedOrigins is { Length: > 0 })
+            {
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            }
+            else
+            {
+                // Default: same-origin only (no additional origins)
+                policy.AllowAnyHeader()
+                    .AllowAnyMethod();
+            }
+        });
+    });
 
     // Rate Limiting
     builder.Services.AddRateLimiter(options =>
@@ -125,6 +149,7 @@ try
     app.UseHttpsRedirection();
     app.UseStaticFiles();
     app.UseRouting();
+    app.UseCors("Default");
     app.UseRateLimiter();
     app.UseResponseCaching();
     app.UseOutputCache();

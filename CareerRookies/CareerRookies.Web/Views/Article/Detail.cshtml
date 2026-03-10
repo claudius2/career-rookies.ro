@@ -26,7 +26,7 @@
                             <i class="bi bi-calendar3 me-1" style="color: var(--cr-primary);"></i>@Model.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("ro-RO"))
                         </span>
                     </div>
-                    <div class="article-content fs-5 lh-lg" style="white-space: pre-wrap;">@Model.Content</div>
+                    <div class="article-content fs-5 lh-lg">@Html.Raw(Model.Content)</div>
                 </article>
 
                 <div class="mt-5 pt-3" style="border-top: 1px solid #e8e0db;">

@@ -9,11 +9,13 @@ public class WorkshopController : Controller
 {
     private readonly IWorkshopService _workshopService;
     private readonly IStudentClassService _studentClassService;
+    private readonly IRecaptchaService _recaptchaService;
 
-    public WorkshopController(IWorkshopService workshopService, IStudentClassService studentClassService)
+    public WorkshopController(IWorkshopService workshopService, IStudentClassService studentClassService, IRecaptchaService recaptchaService)
     {
         _workshopService = workshopService;
         _studentClassService = studentClassService;
+        _recaptchaService = recaptchaService;
     }
 
     public async Task<IActionResult> Upcoming(int page = 1)
@@ -44,6 +46,7 @@ public class WorkshopController : Controller
             RegistrationCount = registrationCount
         };
 
+        SetRecaptchaViewBag();
         return View(model);
     }
 
@@ -64,6 +67,7 @@ public class WorkshopController : Controller
             RegistrationCount = registrationCount
         };
 
+        SetRecaptchaViewBag();
         return View("Detail", model);
     }
 
@@ -71,6 +75,13 @@ public class WorkshopController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(WorkshopRegistrationViewModel model)
     {
+        // Verify reCAPTCHA
+        var recaptchaResponse = Request.Form["g-recaptcha-response"].ToString();
+        if (!await _recaptchaService.VerifyAsync(recaptchaResponse))
+        {
+            ModelState.AddModelError(string.Empty, "Verificarea reCAPTCHA a eșuat. Încearcă din nou.");
+        }
+
         if (!ModelState.IsValid)
         {
             return await ReloadDetailView(model);
@@ -121,6 +132,13 @@ public class WorkshopController : Controller
             Registration = model,
             RegistrationCount = registrationCount
         };
+        SetRecaptchaViewBag();
         return View("Detail", detailModel);
+    }
+
+    private void SetRecaptchaViewBag()
+    {
+        ViewBag.RecaptchaSiteKey = _recaptchaService.SiteKey;
+        ViewBag.RecaptchaEnabled = _recaptchaService.IsEnabled;
     }
 }

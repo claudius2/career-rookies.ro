@@ -1,3 +1,7 @@
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Webp;
 using CareerRookies.Web.Services.Interfaces;
 
 namespace CareerRookies.Web.Services;
@@ -5,20 +9,80 @@ namespace CareerRookies.Web.Services;
 public class FileService : IFileService
 {
     private readonly IWebHostEnvironment _env;
+    private readonly ILogger<FileService> _logger;
 
     private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
         { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
     private const long MaxFileSize = 20 * 1024 * 1024; // 20 MB
+    private const int MaxImageWidth = 1920;
+    private const int MaxImageHeight = 1080;
+    private const int ThumbnailWidth = 400;
+    private const int ThumbnailHeight = 300;
+    private const int JpegQuality = 80;
 
-    public FileService(IWebHostEnvironment env)
+    public FileService(IWebHostEnvironment env, ILogger<FileService> logger)
     {
         _env = env;
+        _logger = logger;
     }
 
     public async Task<string?> SaveImageAsync(IFormFile file, string subfolder)
     {
-        return await SaveFileAsync(file, subfolder, ImageExtensions);
+        if (file.Length > MaxFileSize)
+            return null;
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!ImageExtensions.Contains(extension))
+            return null;
+
+        var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", subfolder);
+        Directory.CreateDirectory(uploadsDir);
+        var fileId = Guid.NewGuid().ToString();
+
+        try
+        {
+            using var inputStream = file.OpenReadStream();
+            using var image = await Image.LoadAsync(inputStream);
+
+            // Resize if larger than max dimensions (preserving aspect ratio)
+            if (image.Width > MaxImageWidth || image.Height > MaxImageHeight)
+            {
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new Size(MaxImageWidth, MaxImageHeight),
+                    Mode = ResizeMode.Max
+                }));
+            }
+
+            // Save optimized image as JPEG
+            var fileName = $"{fileId}.jpg";
+            var filePath = Path.Combine(uploadsDir, fileName);
+            await image.SaveAsJpegAsync(filePath, new JpegEncoder { Quality = JpegQuality });
+
+            // Generate thumbnail
+            var thumbDir = Path.Combine(uploadsDir, "thumbs");
+            Directory.CreateDirectory(thumbDir);
+            image.Mutate(x => x.Resize(new ResizeOptions
+            {
+                Size = new Size(ThumbnailWidth, ThumbnailHeight),
+                Mode = ResizeMode.Max
+            }));
+            var thumbPath = Path.Combine(thumbDir, fileName);
+            await image.SaveAsJpegAsync(thumbPath, new JpegEncoder { Quality = 70 });
+
+            return $"/uploads/{subfolder}/{fileName}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Image optimization failed for {FileName}, saving original", file.FileName);
+            // Fallback: save original file without optimization
+            var fileName = $"{fileId}{extension}";
+            var filePath = Path.Combine(uploadsDir, fileName);
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+            return $"/uploads/{subfolder}/{fileName}";
+        }
     }
 
     public async Task<string?> SaveFileAsync(IFormFile file, string subfolder, HashSet<string> allowedExtensions)
@@ -43,10 +107,23 @@ public class FileService : IFileService
     {
         if (string.IsNullOrEmpty(relativePath)) return;
 
-        var fullPath = Path.Combine(_env.WebRootPath, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        var normalizedPath = relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var fullPath = Path.Combine(_env.WebRootPath, normalizedPath);
         if (File.Exists(fullPath))
         {
             File.Delete(fullPath);
+        }
+
+        // Also delete thumbnail if it exists
+        var dir = Path.GetDirectoryName(fullPath);
+        var fileName = Path.GetFileName(fullPath);
+        if (dir != null && fileName != null)
+        {
+            var thumbPath = Path.Combine(dir, "thumbs", fileName);
+            if (File.Exists(thumbPath))
+            {
+                File.Delete(thumbPath);
+            }
         }
     }
 
