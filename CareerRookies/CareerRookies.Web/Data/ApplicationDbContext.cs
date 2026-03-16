@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<CareerResource> CareerResources => Set<CareerResource>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
 
     public override int SaveChanges()
     {
@@ -196,6 +197,12 @@ public class ApplicationDbContext : IdentityDbContext
             entity.Property(m => m.MediaType)
                 .HasConversion<string>()
                 .HasMaxLength(50);
+        });
+
+        // TeamMember
+        builder.Entity<TeamMember>(entity =>
+        {
+            entity.HasIndex(t => t.SortOrder);
         });
 
         // AuditLog

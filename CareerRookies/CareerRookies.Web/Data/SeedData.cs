@@ -18,6 +18,7 @@ public static class SeedData
         await SeedAdminUserAsync(userManager, config, logger);
         await SeedStudentClassesAsync(context);
         await SeedSiteSettingsAsync(context);
+        await SeedMissingSiteSettingsAsync(context);
         await SeedCareerResourcesAsync(context);
     }
 
@@ -94,6 +95,27 @@ public static class SeedData
 
         context.SiteSettings.AddRange(settings);
         await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedMissingSiteSettingsAsync(ApplicationDbContext context)
+    {
+        var existingKeys = await context.SiteSettings.Select(s => s.Key).ToListAsync();
+
+        var newSettings = new List<SiteSetting>
+        {
+            new() { Key = "AboutProjectText", Value = "<p>Career Rookies este o inițiativă dedicată elevilor din România care își doresc să-și construiască un viitor profesional de succes.</p><p>Misiunea noastră este să oferim tinerilor acces la workshop-uri, resurse și mentorat din partea profesioniștilor din diverse domenii. Credem că fiecare elev merită să aibă acces la informații și oportunități care să-l ajute să ia cele mai bune decizii pentru cariera sa.</p><p>Prin evenimentele și resursele noastre, conectăm elevii cu experți din industrie, consilieri de carieră și programe educaționale care le deschid noi perspective.</p>" },
+            new() { Key = "FooterAboutText", Value = "Ajutăm liceenii să descopere lumea profesională prin workshop-uri interactive, resurse educative și oportunități reale de dezvoltare." },
+            new() { Key = "FooterContactEmail", Value = "contact@careerrookies.ro" },
+            new() { Key = "FooterContactLocation", Value = "Sibiu, România" },
+            new() { Key = "FooterInstagramUrl", Value = "https://www.instagram.com/career_rookies/" }
+        };
+
+        var toAdd = newSettings.Where(s => !existingKeys.Contains(s.Key)).ToList();
+        if (toAdd.Any())
+        {
+            context.SiteSettings.AddRange(toAdd);
+            await context.SaveChangesAsync();
+        }
     }
 
     private static async Task SeedCareerResourcesAsync(ApplicationDbContext context)

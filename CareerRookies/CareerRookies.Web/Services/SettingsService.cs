@@ -25,6 +25,14 @@ public class SettingsService : ISettingsService
         return setting?.Value;
     }
 
+    public async Task<Dictionary<string, string>> GetMultipleAsync(params string[] keys)
+    {
+        var settings = await _context.SiteSettings
+            .Where(s => keys.Contains(s.Key))
+            .ToListAsync();
+        return settings.ToDictionary(s => s.Key, s => s.Value);
+    }
+
     public async Task<bool> GetBoolAsync(string key, bool defaultValue = false)
     {
         var value = await GetValueAsync(key);

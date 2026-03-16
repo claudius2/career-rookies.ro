@@ -1,0 +1,82 @@
+@model CareerRookies.Web.ViewModels.Admin.TeamMemberFormViewModel
+@{
+    ViewData["Title"] = "Editeaza Membru Echipa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Editeaza Membru Echipa</h1>
+        <a href="/Admin/TeamMembers" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Inapoi la lista
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/Admin/TeamMembers/Edit/@Model.Id" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ExistingImagePath" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Numele membrului" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Descrierea membrului"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label"></label>
+                            @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                            {
+                                <div class="mb-2">
+                                    <img src="@Model.ExistingImagePath" alt="@Model.Name"
+                                         style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;" />
+                                </div>
+                            }
+                            <input asp-for="Image" type="file" class="form-control" accept="image/*" />
+                            <small class="text-muted">Lasati gol pentru a pastra imaginea curenta.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SortOrder" class="form-label"></label>
+                            <input asp-for="SortOrder" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Salveaza
+                    </button>
+                    <a href="/Admin/TeamMembers" class="btn btn-outline-secondary">Anuleaza</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

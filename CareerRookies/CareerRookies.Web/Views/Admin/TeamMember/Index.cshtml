@@ -1,0 +1,94 @@
+@model List<CareerRookies.Web.Models.TeamMember>
+@{
+    ViewData["Title"] = "Gestionare Echipa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 mb-0">Echipa</h1>
+        <a href="/Admin/TeamMembers/Create" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Adauga
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row g-3">
+            @foreach (var member in Model)
+            {
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body py-3">
+                            <div class="row align-items-center">
+                                <!-- Photo -->
+                                <div class="col-auto">
+                                    @if (!string.IsNullOrEmpty(member.ImagePath))
+                                    {
+                                        <img src="@member.ImagePath" alt="@member.Name"
+                                             style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-light rounded-circle"
+                                             style="width: 48px; height: 48px;">
+                                            <i class="bi bi-person fs-4 text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Info -->
+                                <div class="col-lg-4">
+                                    <strong>@member.Name</strong>
+                                    @if (!string.IsNullOrEmpty(member.Description))
+                                    {
+                                        <p class="mb-0 small text-muted">
+                                            @(member.Description.Length > 100 ? member.Description[..100] + "..." : member.Description)
+                                        </p>
+                                    }
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-lg-3 mt-2 mt-lg-0">
+                                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                                        @if (member.IsActive)
+                                        {
+                                            <span class="badge bg-success">Activ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactiv</span>
+                                        }
+                                        <small class="text-muted">Ordine: @member.SortOrder</small>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="col-lg mt-2 mt-lg-0 text-lg-end">
+                                    <a href="/Admin/TeamMembers/Edit/@member.Id" class="btn btn-sm btn-outline-primary" title="Editeaza">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="/Admin/TeamMembers/Delete/@member.Id"
+                                          method="post" class="d-inline"
+                                          onsubmit="return confirm('Sigur doriti sa stergeti acest membru?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sterge">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-people fs-1 d-block mb-3"></i>
+            <p>Nu exista membri in echipa. Adaugati primul membru.</p>
+        </div>
+    }
+</div>

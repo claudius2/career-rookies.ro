@@ -1,0 +1,72 @@
+@model CareerRookies.Web.ViewModels.Admin.TeamMemberFormViewModel
+@{
+    ViewData["Title"] = "Adauga Membru Echipa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Adauga Membru Echipa</h1>
+        <a href="/Admin/TeamMembers" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Inapoi la lista
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/Admin/TeamMembers/Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Numele membrului" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Descrierea membrului"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label"></label>
+                            <input asp-for="Image" type="file" class="form-control" accept="image/*" />
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SortOrder" class="form-label"></label>
+                            <input asp-for="SortOrder" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="SortOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Salveaza
+                    </button>
+                    <a href="/Admin/TeamMembers" class="btn btn-outline-secondary">Anuleaza</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

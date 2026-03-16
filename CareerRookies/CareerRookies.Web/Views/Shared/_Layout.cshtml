@@ -1,3 +1,11 @@
+@inject CareerRookies.Web.Services.Interfaces.ISettingsService SettingsService
+@{
+    var footerSettings = await SettingsService.GetMultipleAsync("FooterAboutText", "FooterContactEmail", "FooterContactLocation", "FooterInstagramUrl");
+    var footerAbout = footerSettings.GetValueOrDefault("FooterAboutText", "Ajutăm liceenii să descopere lumea profesională prin workshop-uri interactive, resurse educative și oportunități reale de dezvoltare.");
+    var footerEmail = footerSettings.GetValueOrDefault("FooterContactEmail", "contact@careerrookies.ro");
+    var footerLocation = footerSettings.GetValueOrDefault("FooterContactLocation", "Sibiu, România");
+    var footerInstagram = footerSettings.GetValueOrDefault("FooterInstagramUrl", "https://www.instagram.com/career_rookies/");
+}
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -61,7 +69,7 @@
                             <a class="nav-link" asp-controller="Article" asp-action="Index">Articole</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Testimonial" asp-action="Index">Testimoniale</a>
+                            <a class="nav-link" asp-controller="Testimonial" asp-action="Index">Review-uri</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Resource" asp-action="Index">Resurse</a>
@@ -84,8 +92,7 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <h5>Career Rookies</h5>
-                    <p>Ajutăm liceenii să descopere lumea profesională prin workshop-uri interactive,
-                        resurse educative și oportunități reale de dezvoltare.</p>
+                    <p>@footerAbout</p>
                 </div>
                 <div class="col-lg-4">
                     <h5>Link-uri rapide</h5>
@@ -93,18 +100,18 @@
                         <li><a href="/">Acasă</a></li>
                         <li><a asp-controller="Workshop" asp-action="Upcoming">Workshop-uri</a></li>
                         <li><a asp-controller="Article" asp-action="Index">Articole</a></li>
-                        <li><a asp-controller="Testimonial" asp-action="Index">Testimoniale</a></li>
+                        <li><a asp-controller="Testimonial" asp-action="Index">Review-uri</a></li>
                         <li><a asp-controller="Resource" asp-action="Index">Resurse</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
                     <h5>Contact</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><i class="bi bi-envelope me-2"></i>contact@@careerrookies.ro</li>
-                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Sibiu, România</li>
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i>@footerEmail</li>
+                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>@footerLocation</li>
                     </ul>
                     <div class="footer-social mt-3">
-                        <a href="https://www.instagram.com/career_rookies/" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="@footerInstagram" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="bi bi-instagram"></i></a>
                     </div>
                 </div>
             </div>

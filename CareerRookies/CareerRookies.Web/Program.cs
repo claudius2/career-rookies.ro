@@ -61,6 +61,7 @@ try
     builder.Services.AddScoped<IResourceService, ResourceService>();
     builder.Services.AddScoped<ISettingsService, SettingsService>();
     builder.Services.AddScoped<IStudentClassService, StudentClassService>();
+    builder.Services.AddScoped<ITeamMemberService, TeamMemberService>();
     builder.Services.AddScoped<IFileService, FileService>();
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<IDashboardService, DashboardService>();

@@ -8,4 +8,5 @@ public class DashboardViewModel
     public int TotalRegistrations { get; set; }
     public int TestimonialCount { get; set; }
     public int ResourceCount { get; set; }
+    public int TeamMemberCount { get; set; }
 }

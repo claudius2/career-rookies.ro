@@ -40,6 +40,8 @@ public class DashboardService : IDashboardService
 
         var resourceCount = await _context.CareerResources.CountAsync();
 
+        var teamMemberCount = await _context.TeamMembers.CountAsync();
+
         return new DashboardViewModel
         {
             WorkshopCount = stats?.WorkshopCount ?? 0,
@@ -47,7 +49,8 @@ public class DashboardService : IDashboardService
             PendingArticles = pendingArticles,
             TotalRegistrations = totalRegistrations,
             TestimonialCount = testimonialCount,
-            ResourceCount = resourceCount
+            ResourceCount = resourceCount,
+            TeamMemberCount = teamMemberCount
         };
     }
 }

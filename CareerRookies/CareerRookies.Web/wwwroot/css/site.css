@@ -1132,6 +1132,53 @@ textarea.form-control {
 }
 
 /* ============================================================
+   ABOUT PROJECT TRUNCATION
+   ============================================================ */
+.about-project-truncated {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.about-project-truncated.expanded {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+
+/* ============================================================
+   TEAM MEMBER CARDS
+   ============================================================ */
+.team-member-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.team-member-card .team-member-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    border: 3px solid var(--cr-secondary);
+}
+
+.team-member-card .team-member-name {
+    font-family: var(--cr-font-heading);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--cr-primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.team-member-card .team-member-description {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ============================================================
    RESPONSIVE BREAKPOINTS
    ============================================================ */
 

@@ -11,29 +11,38 @@ public class HomeController : Controller
     private readonly ITestimonialService _testimonialService;
     private readonly IArticleService _articleService;
     private readonly IResourceService _resourceService;
+    private readonly ISettingsService _settingsService;
+    private readonly ITeamMemberService _teamMemberService;
 
     public HomeController(
         IWorkshopService workshopService,
         ITestimonialService testimonialService,
         IArticleService articleService,
-        IResourceService resourceService)
+        IResourceService resourceService,
+        ISettingsService settingsService,
+        ITeamMemberService teamMemberService)
     {
         _workshopService = workshopService;
         _testimonialService = testimonialService;
         _articleService = articleService;
         _resourceService = resourceService;
+        _settingsService = settingsService;
+        _teamMemberService = teamMemberService;
     }
 
     [Route("")]
     [Route("acasa")]
     public async Task<IActionResult> Index()
     {
+        var aboutText = await _settingsService.GetValueAsync("AboutProjectText");
         var model = new HomeViewModel
         {
             UpcomingWorkshops = await _workshopService.GetUpcomingTopAsync(3),
             Testimonials = await _testimonialService.GetTopApprovedAsync(10),
             RecentArticles = await _articleService.GetRecentApprovedAsync(3),
-            FeaturedResources = await _resourceService.GetTopAsync(6)
+            FeaturedResources = await _resourceService.GetTopAsync(6),
+            AboutProjectText = aboutText ?? "<p>Career Rookies este o inițiativă dedicată elevilor din România care își doresc să-și construiască un viitor profesional de succes.</p>",
+            TeamMembers = await _teamMemberService.GetActiveAsync()
         };
         return View(model);
     }

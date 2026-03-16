@@ -12,7 +12,7 @@ public class SiteSetting
     public string Key { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Valoarea este obligatorie.")]
-    [MaxLength(500)]
+    [MaxLength(4000)]
     [Display(Name = "Valoare")]
     public string Value { get; set; } = string.Empty;
 }

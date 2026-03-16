@@ -75,6 +75,9 @@
             var href = link.getAttribute('href');
             if (!href) return;
 
+            // Skip dropdown toggles (href="#") to avoid false active match on homepage
+            if (link.classList.contains('dropdown-toggle') || href === '#') return;
+
             // Build a comparable path
             var linkPath;
             try {
@@ -155,6 +158,22 @@
             }
         });
     }
+
+    /* ---------------------------------------------------------
+       ABOUT PROJECT TOGGLE
+       --------------------------------------------------------- */
+    window.toggleAboutProject = function () {
+        var content = document.getElementById('aboutProjectContent');
+        var btnText = document.getElementById('aboutToggleText');
+        var btnIcon = document.getElementById('aboutToggleIcon');
+        if (!content) return;
+
+        var isExpanded = content.classList.toggle('expanded');
+        if (btnText) btnText.textContent = isExpanded ? 'Arată mai puțin' : 'Află mai multe';
+        if (btnIcon) {
+            btnIcon.className = isExpanded ? 'bi bi-arrow-up me-2' : 'bi bi-arrow-right me-2';
+        }
+    };
 
     /* ---------------------------------------------------------
        INIT ON DOM READY
