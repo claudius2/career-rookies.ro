@@ -11,7 +11,7 @@ public class TeamMemberFormViewModel
     [Display(Name = "Nume")]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(1000)]
+    [MaxLength(4000)]
     [Display(Name = "Descriere")]
     public string Description { get; set; } = string.Empty;
 

@@ -103,7 +103,7 @@
                             <div class="team-member-name">@member.Name</div>
                             @if (!string.IsNullOrEmpty(member.Description))
                             {
-                                <p class="team-member-description">@member.Description</p>
+                                <div class="team-member-description">@Html.Raw(member.Description)</div>
                             }
                         </div>
                     </div>
