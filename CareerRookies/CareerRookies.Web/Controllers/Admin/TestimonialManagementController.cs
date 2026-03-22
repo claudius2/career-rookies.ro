@@ -51,7 +51,7 @@ public class TestimonialManagementController : Controller
 
         await _testimonialService.CreateAsync(testimonial);
         await _auditService.LogAsync("Testimonial", testimonial.Id, "Created", User.Identity?.Name);
-        TempData["Success"] = "Testimonialul a fost creat.";
+        TempData["Success"] = "Review-ul a fost creat.";
         return RedirectToAction("Index");
     }
 
@@ -93,7 +93,7 @@ public class TestimonialManagementController : Controller
         testimonial.SortOrder = model.SortOrder;
         await _testimonialService.UpdateAsync(testimonial);
         await _auditService.LogAsync("Testimonial", testimonial.Id, "Updated", User.Identity?.Name);
-        TempData["Success"] = "Testimonialul a fost actualizat.";
+        TempData["Success"] = "Review-ul a fost actualizat.";
         return RedirectToAction("Index");
     }
 
@@ -104,7 +104,7 @@ public class TestimonialManagementController : Controller
     {
         await _testimonialService.ApproveAsync(id);
         await _auditService.LogAsync("Testimonial", id, "Approved", User.Identity?.Name);
-        TempData["Success"] = "Testimonialul a fost aprobat.";
+        TempData["Success"] = "Review-ul a fost aprobat.";
         return RedirectToAction("Index");
     }
 
@@ -115,7 +115,7 @@ public class TestimonialManagementController : Controller
     {
         await _testimonialService.SoftDeleteAsync(id);
         await _auditService.LogAsync("Testimonial", id, "Deleted", User.Identity?.Name);
-        TempData["Success"] = "Testimonialul a fost sters.";
+        TempData["Success"] = "Review-ul a fost sters.";
         return RedirectToAction("Index");
     }
 }

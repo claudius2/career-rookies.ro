@@ -1,12 +1,12 @@
 @model CareerRookies.Web.ViewModels.Admin.TestimonialFormViewModel
 @{
-    ViewData["Title"] = "Adauga Testimonial";
+    ViewData["Title"] = "Adaugă Review";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Adauga Testimonial</h1>
+        <h1 class="h3 mb-0">Adaugă Review</h1>
         <a href="/Admin/Testimonials" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Inapoi la lista
         </a>
@@ -22,7 +22,7 @@
                     <div class="col-md-8">
                         <div class="mb-3">
                             <label asp-for="Text" class="form-label"></label>
-                            <textarea asp-for="Text" class="form-control" rows="5" placeholder="Textul testimonialului"></textarea>
+                            <textarea asp-for="Text" class="form-control" rows="5" placeholder="Textul review-ului"></textarea>
                             <span asp-validation-for="Text" class="text-danger"></span>
                         </div>
                     </div>

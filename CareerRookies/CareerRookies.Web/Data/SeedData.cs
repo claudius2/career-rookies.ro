@@ -36,7 +36,7 @@ public static class SeedData
 
     private static async Task SeedAdminUserAsync(UserManager<IdentityUser> userManager, IConfiguration config, ILogger logger)
     {
-        var adminEmail = config["AdminSettings:Email"] ?? "admin@careerrookies.ro";
+        var adminEmail = config["AdminSettings:Email"] ?? "admin@career-rookies.ro";
         var adminPassword = config["AdminSettings:Password"] ?? "Admin123!";
 
         if (await userManager.FindByEmailAsync(adminEmail) == null)
@@ -105,7 +105,7 @@ public static class SeedData
         {
             new() { Key = "AboutProjectText", Value = "<p>Career Rookies este o inițiativă dedicată elevilor din România care își doresc să-și construiască un viitor profesional de succes.</p><p>Misiunea noastră este să oferim tinerilor acces la workshop-uri, resurse și mentorat din partea profesioniștilor din diverse domenii. Credem că fiecare elev merită să aibă acces la informații și oportunități care să-l ajute să ia cele mai bune decizii pentru cariera sa.</p><p>Prin evenimentele și resursele noastre, conectăm elevii cu experți din industrie, consilieri de carieră și programe educaționale care le deschid noi perspective.</p>" },
             new() { Key = "FooterAboutText", Value = "Ajutăm liceenii să descopere lumea profesională prin workshop-uri interactive, resurse educative și oportunități reale de dezvoltare." },
-            new() { Key = "FooterContactEmail", Value = "contact@careerrookies.ro" },
+            new() { Key = "FooterContactEmail", Value = "contact@career-rookies.ro" },
             new() { Key = "FooterContactLocation", Value = "Sibiu, România" },
             new() { Key = "FooterInstagramUrl", Value = "https://www.instagram.com/career_rookies/" }
         };

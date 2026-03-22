@@ -75,44 +75,6 @@
     </div>
 </section>
 
-<!-- Echipa -->
-@if (Model.TeamMembers.Any())
-{
-    <section id="team-members" class="page-section section-cream">
-        <div class="container">
-            <div class="section-title">
-                <h2>Echipa noastră</h2>
-                <p>Cunoaște oamenii din spatele Career Rookies</p>
-            </div>
-            <div class="row g-4 justify-content-center">
-                @foreach (var member in Model.TeamMembers)
-                {
-                    <div class="col-sm-6 col-md-4 col-lg-3">
-                        <div class="card card-cr team-member-card h-100">
-                            @if (!string.IsNullOrEmpty(member.ImagePath))
-                            {
-                                <img src="@member.ImagePath" alt="@member.Name" class="team-member-photo" />
-                            }
-                            else
-                            {
-                                <div class="team-member-photo d-flex align-items-center justify-content-center mx-auto"
-                                     style="background: linear-gradient(135deg, rgba(91,26,74,0.1), rgba(194,24,91,0.1));">
-                                    <i class="bi bi-person" style="font-size: 2.5rem; color: var(--cr-primary);"></i>
-                                </div>
-                            }
-                            <div class="team-member-name">@member.Name</div>
-                            @if (!string.IsNullOrEmpty(member.Description))
-                            {
-                                <div class="team-member-description">@Html.Raw(member.Description)</div>
-                            }
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </section>
-}
-
 <!-- Workshop-uri Viitoare -->
 <section class="page-section section-cream">
     <div class="container">
@@ -175,12 +137,50 @@
     </div>
 </section>
 
-<!-- Opinii / Testimoniale -->
+<!-- Echipa -->
+@if (Model.TeamMembers.Any())
+{
+    <section id="team-members" class="page-section section-cream">
+        <div class="container">
+            <div class="section-title">
+                <h2>Echipa noastră</h2>
+                <p>Cunoaște oamenii din spatele Career Rookies</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                @foreach (var member in Model.TeamMembers)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card card-cr team-member-card h-100">
+                            @if (!string.IsNullOrEmpty(member.ImagePath))
+                            {
+                                <img src="@member.ImagePath" alt="@member.Name" class="team-member-photo" />
+                            }
+                            else
+                            {
+                                <div class="team-member-photo d-flex align-items-center justify-content-center mx-auto"
+                                     style="background: linear-gradient(135deg, rgba(91,26,74,0.1), rgba(194,24,91,0.1));">
+                                    <i class="bi bi-person" style="font-size: 2.5rem; color: var(--cr-primary);"></i>
+                                </div>
+                            }
+                            <div class="team-member-name">@member.Name</div>
+                            @if (!string.IsNullOrEmpty(member.Description))
+                            {
+                                <div class="team-member-description">@Html.Raw(member.Description)</div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Review-uri -->
 <section class="page-section section-white">
     <div class="container">
         <div class="section-title">
-            <h2>Ce spun participanții</h2>
-            <p>Opiniile elevilor și speakerilor despre experiența Career Rookies</p>
+            <h2>Review-uri</h2>
+            <p>Ce spun elevii și speakerii despre experiența Career Rookies</p>
         </div>
         @if (Model.Testimonials.Any())
         {
@@ -221,7 +221,7 @@
         }
         else
         {
-            <p class="text-center text-muted">Nu există testimoniale momentan.</p>
+            <p class="text-center text-muted">Nu există review-uri momentan.</p>
         }
     </div>
 </section>

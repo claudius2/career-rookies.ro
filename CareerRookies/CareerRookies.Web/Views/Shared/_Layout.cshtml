@@ -2,7 +2,7 @@
 @{
     var footerSettings = await SettingsService.GetMultipleAsync("FooterAboutText", "FooterContactEmail", "FooterContactLocation", "FooterInstagramUrl");
     var footerAbout = footerSettings.GetValueOrDefault("FooterAboutText", "Ajutăm liceenii să descopere lumea profesională prin workshop-uri interactive, resurse educative și oportunități reale de dezvoltare.");
-    var footerEmail = footerSettings.GetValueOrDefault("FooterContactEmail", "contact@careerrookies.ro");
+    var footerEmail = footerSettings.GetValueOrDefault("FooterContactEmail", "contact@career-rookies.ro");
     var footerLocation = footerSettings.GetValueOrDefault("FooterContactLocation", "Sibiu, România");
     var footerInstagram = footerSettings.GetValueOrDefault("FooterInstagramUrl", "https://www.instagram.com/career_rookies/");
 }
@@ -92,7 +92,7 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <h5>Career Rookies</h5>
-                    <p>@footerAbout</p>
+                    @Html.Raw(footerAbout)
                 </div>
                 <div class="col-lg-4">
                     <h5>Link-uri rapide</h5>
